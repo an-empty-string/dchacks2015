@@ -224,7 +224,12 @@ class MetrorailLine:
         if int_end2:
             end_codes.append(int_end2)
         end_codes.append(end)
-        self.destinations = [api.stations[code] for code in end_codes]
+        self.destination_codes = end_codes
+
+    @property
+    def destinations(self):
+        return [self.api.stations[code] for code in self.destination_codes]
+    
 
     def _get_path(self):
         return [i["StationCode"] for i in self.api.get_json(build_url(Service.rail, "jPath"),

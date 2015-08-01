@@ -1,6 +1,6 @@
 import requests
 import operator
-import redis
+#import redis
 import json
 from functools import reduce
 
@@ -62,26 +62,18 @@ class MetrorailRoute:
     def __repr__(self):
         start = self.path[0]
         end = self.path[-1]
-        transfer_string = "\n".join(["Transfer at %s" % station for station in self.transfers]) + "\n"
+        transfer_string = "\n".join(["Transfer at %s" % station for station in self.transfers])
         return "Start at %s\n%sEnd at %s\n\n%s" % (start, transfer_string, end, self.meta)
 
 class MetrorailTrainPrediction:
-    def __init__(self, line, destination, station, time, car):
+    def __init__(self, line, destination, station, time):
         self.line = line
         self.destination = destination
         self.station = station
         self.time = time
-        self.cars = self.car_format(car)
-
-    def car_format(self, car):
-        if car == "2":
-            return 8
-        if car == "-":
-            return 6
-        return int(car)
 
     def __repr__(self):
-        return "%i-car train on %s arriving in %smin to %s (destination is %s)" % (self.cars, self.line, self.time, self.station, self.destination)
+        return "Train on %s arriving in %smin to %s (destination is %s)" % (self.line, self.time, self.station, self.destination)
 
 class MetrorailStation:
     def __init__(self, api, name, station_code, lines, location):
@@ -109,17 +101,8 @@ class MetrorailStation:
     def trains(self):
         station_codes = [i.station_code for i in self.api.stations.all.values() if i == self]
         data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/%s" % ",".join(station_codes)), nocache=True)["Trains"]
-        return [MetrorailTrainPrediction(
-                    self.api.lines[i["Line"]],
-                    self.api.stations[i["DestinationCode"]],
-                    self,
-                    i["Min"],
-                    i["Car"]
-                ) for i in data if (
-                    i["DestinationCode"] is not None and
-                    MetrorailLine.is_valid(i["Line"]) and
-                    i["Car"] is not None
-                )]
+        return [MetrorailTrainPrediction(self.api.lines[i["Line"]], self.api.stations[i["DestinationCode"]],
+                self, i["Min"]) for i in data if i["DestinationCode"] is not None]
 
     def _lines(self):
         return {self.api.lines[code] for code in self._line_codes}
@@ -160,17 +143,8 @@ class MetrorailStations:
 
         for station in data:
             if station["Code"] not in self._cache:
-                self._cache[station["Code"]] = MetrorailStation(
-                                                    self.api,
-                                                    station["Name"],
-                                                    station["Code"],
-                                                    self._lines(station),
-                                                    MetrorailLocation(
-                                                        station["Lat"],
-                                                        station["Lon"],
-                                                        MetrorailAddress(station["Address"])
-                                                    )
-                                               )
+                self._cache[station["Code"]] = MetrorailStation(self.api, station["Name"], station["Code"], self._lines(station),
+                    MetrorailLocation(station["Lat"], station["Lon"], MetrorailAddress(station["Address"])))
 
         self._fix_cache()
         return self._cache
@@ -182,17 +156,9 @@ class MetrorailStations:
 
         maybe_data = list(filter(lambda k: k["Code"] == station_code, self._raw_json))
         if len(maybe_data) > 0:
-            self._cache[station_code] = MetrorailStation(
-                                            self.api,
-                                            maybe_data[0]["Name"],
-                                            station_code,
-                                            self._lines(maybe_data[0]),
-                                            MetrorailLocation(
-                                                maybe_data[0]["Lat"],
-                                                maybe_data[0]["Lon"],
-                                                MetrorailAddress(maybe_data[0]["Address"])
-                                            )
-                                        )
+            self._cache[station_code] = MetrorailStation(self.api, maybe_data[0]["Name"], station_code, self._lines(maybe_data[0]),
+                                            MetrorailLocation(maybe_data[0]["Lat"], maybe_data[0]["Lon"],
+                                            MetrorailAddress(maybe_data[0]["Address"])))
 
         self._raw_json = self.api.get_json(build_url(Service.rail, "jStations"))["Stations"]
         return self.__getitem__(station_code)
@@ -210,26 +176,13 @@ class MetrorailStations:
     all = property(_all)
 
 class MetrorailLine:
-    def __init__(self, api, friendly_name, line_code, start, end, int_end1, int_end2):
+    def __init__(self, api, friendly_name, line_code, start, end):
         self.api = api
         self.friendly_name = friendly_name
         self.line_code = line_code
         self.start = start
         self.end = end
         self.path = self._get_path()
-        end_codes = []
-        end_codes.append(start)
-        if int_end1:
-            end_codes.append(int_end1)
-        if int_end2:
-            end_codes.append(int_end2)
-        end_codes.append(end)
-        self.destination_codes = end_codes
-
-    @property
-    def destinations(self):
-        return [self.api.stations[code] for code in self.destination_codes]
-    
 
     def _get_path(self):
         return [i["StationCode"] for i in self.api.get_json(build_url(Service.rail, "jPath"),
@@ -240,12 +193,6 @@ class MetrorailLine:
 
     def __repr__(self):
         return "%s Line (%s)" % (self.friendly_name, self.line_code)
-
-    @classmethod
-    def is_valid(line_str):
-        if line_str is None or len(line_str) < 2 or line_str == "No":
-            return False
-        return True
 
     stations = property(_stations)
 
@@ -264,15 +211,8 @@ class MetrorailLines:
 
         for line in data:
             if line["LineCode"] not in self._cache:
-                self._cache[line["LineCode"]] = MetrorailLine(
-                    self.api,
-                    line["DisplayName"],
-                    line["LineCode"],
-                    line["StartStationCode"],
-                    line["EndStationCode"],
-                    line["InternalDestination1"],
-                    line["InternalDestination2"]
-                )
+                self._cache[line["LineCode"]] = MetrorailLine(self.api, line["DisplayName"], line["LineCode"],
+                    line["StartStationCode"], line["EndStationCode"])
 
         return self._cache
 
@@ -282,14 +222,8 @@ class MetrorailLines:
 
         maybe_data = list(filter(lambda k: k["LineCode"] == line_code, self._raw_json))
         if len(maybe_data) > 0:
-            self._cache[line_code] = MetrorailLine(
-                self.api,
-                maybe_data[0]["DisplayName"],
-                line_code,
-                maybe_data[0]["StartStationCode"],
-                maybe_data[0]["EndStationCode"],
-                maybe_data[0]["InternalDestination1"],
-                maybe_data[0]["InternalDestination2"])
+            self._cache[line_code] = MetrorailLine(self.api, maybe_data[0]["DisplayName"], line_code,
+                maybe_data[0]["StartStationCode"], maybe_data[0]["EndStationCode"])
             return self._cache[line_code]
 
         self._raw_json = self.api.get_json(build_url(Service.rail, "jLines"))["Lines"]
@@ -373,24 +307,14 @@ class MetrorailSystem:
         data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/All"), nocache=True)["Trains"]
         result = {}
         for prediction in data:
-            if prediction["LocationCode"] is None or prediction["DestinationCode"] is None or prediction["Car"] is None:
+            if prediction["LocationCode"] is None or prediction["DestinationCode"] is None:
                 continue
             if self.api.stations[prediction["LocationCode"]] not in result:
                 result[self.api.stations[prediction["LocationCode"]]] = []
             result[self.api.stations[prediction["LocationCode"]]].append(
-                MetrorailTrainPrediction(
-                    self.api.lines[prediction["Line"]],
-                    self.api.stations[prediction["DestinationCode"]],
-                    self.api.stations[prediction["LocationCode"]],
-                    prediction["Min"],
-                    prediction["Car"]
-                )
-            )
-
-        all_stations = self.api.stations.all
-        for station in all_stations:
-            if station not in result:
-                result[all_stations[station]] = []
+                MetrorailTrainPrediction(self.api.lines[prediction["Line"]],
+                self.api.stations[prediction["DestinationCode"]],
+                self.api.stations[prediction["LocationCode"]], prediction["Min"]))
         return result
 
 class MetroApi:
@@ -433,3 +357,4 @@ class MetroApi:
         if not value:
             return None
         return json.loads(value.decode("utf-8"))
+

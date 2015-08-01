@@ -210,13 +210,21 @@ class MetrorailStations:
     all = property(_all)
 
 class MetrorailLine:
-    def __init__(self, api, friendly_name, line_code, start, end):
+    def __init__(self, api, friendly_name, line_code, start, end, int_end1, int_end2):
         self.api = api
         self.friendly_name = friendly_name
         self.line_code = line_code
         self.start = start
         self.end = end
         self.path = self._get_path()
+        end_codes = []
+        end_codes.append(start)
+        if int_end1:
+            end_codes.append(int_end1)
+        if int_end2:
+            end_codes.append(int_end2)
+        end_codes.append(end)
+        self.destinations = [api.stations[code] for code in end_codes]
 
     def _get_path(self):
         return [i["StationCode"] for i in self.api.get_json(build_url(Service.rail, "jPath"),
@@ -251,8 +259,15 @@ class MetrorailLines:
 
         for line in data:
             if line["LineCode"] not in self._cache:
-                self._cache[line["LineCode"]] = MetrorailLine(self.api, line["DisplayName"], line["LineCode"],
-                    line["StartStationCode"], line["EndStationCode"])
+                self._cache[line["LineCode"]] = MetrorailLine(
+                    self.api,
+                    line["DisplayName"],
+                    line["LineCode"],
+                    line["StartStationCode"],
+                    line["EndStationCode"],
+                    line["InternalDestination1"],
+                    line["InternalDestination2"]
+                )
 
         return self._cache
 
@@ -262,8 +277,14 @@ class MetrorailLines:
 
         maybe_data = list(filter(lambda k: k["LineCode"] == line_code, self._raw_json))
         if len(maybe_data) > 0:
-            self._cache[line_code] = MetrorailLine(self.api, maybe_data[0]["DisplayName"], line_code,
-                maybe_data[0]["StartStationCode"], maybe_data[0]["EndStationCode"])
+            self._cache[line_code] = MetrorailLine(
+                self.api,
+                maybe_data[0]["DisplayName"],
+                line_code,
+                maybe_data[0]["StartStationCode"],
+                maybe_data[0]["EndStationCode"],
+                maybe_data[0]["InternalDestination1"],
+                maybe_data[0]["InternalDestination2"])
             return self._cache[line_code]
 
         self._raw_json = self.api.get_json(build_url(Service.rail, "jLines"))["Lines"]
@@ -360,6 +381,11 @@ class MetrorailSystem:
                     prediction["Car"]
                 )
             )
+
+        all_stations = self.api.stations.all
+        for station in all_stations:
+            if station not in result:
+                result[all_stations[station]] = []
         return result
 
 class MetroApi:

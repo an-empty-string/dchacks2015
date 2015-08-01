@@ -20,8 +20,9 @@ for train in all_trains:
     cars = train.cars
     time = train.time_int
 
-    print(next_station, time, line_code, dest_station, cars)
-
     HistoricalTrainPosition.create(cars=cars, line_code=line_code, time=time,
                                    next_station=next_station, dest_station=dest_station,
                                    timestamp=ts)
+
+
+print("Added", len(all_trains), "trains at", ts)

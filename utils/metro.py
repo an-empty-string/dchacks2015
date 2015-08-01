@@ -66,14 +66,22 @@ class MetrorailRoute:
         return "Start at %s\n%sEnd at %s\n\n%s" % (start, transfer_string, end, self.meta)
 
 class MetrorailTrainPrediction:
-    def __init__(self, line, destination, station, time):
+    def __init__(self, line, destination, station, time, car):
         self.line = line
         self.destination = destination
         self.station = station
         self.time = time
+        self.cars = self.car_format(car)
+
+    def car_format(self, car):
+        if car == "2":
+            return 8
+        if car == "-":
+            return 6
+        return int(car)
 
     def __repr__(self):
-        return "Train on %s arriving in %smin to %s (destination is %s)" % (self.line, self.time, self.station, self.destination)
+        return "%i-car train on %s arriving in %smin to %s (destination is %s)" % (self.cars, self.line, self.time, self.station, self.destination)
 
 class MetrorailStation:
     def __init__(self, api, name, station_code, lines, location):
@@ -101,8 +109,17 @@ class MetrorailStation:
     def trains(self):
         station_codes = [i.station_code for i in self.api.stations.all.values() if i == self]
         data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/%s" % ",".join(station_codes)), nocache=True)["Trains"]
-        return [MetrorailTrainPrediction(self.api.lines[i["Line"]], self.api.stations[i["DestinationCode"]],
-                self, i["Min"]) for i in data if i["DestinationCode"] is not None]
+        return [MetrorailTrainPrediction(
+                    self.api.lines[i["Line"]],
+                    self.api.stations[i["DestinationCode"]],
+                    self,
+                    i["Min"],
+                    i["Car"]
+                ) for i in data if (
+                    i["DestinationCode"] is not None and
+                    MetrorailLine.is_valid(i["Line"]) and
+                    i["Car"] is not None
+                )]
 
     def _lines(self):
         return {self.api.lines[code] for code in self._line_codes}
@@ -143,8 +160,17 @@ class MetrorailStations:
 
         for station in data:
             if station["Code"] not in self._cache:
-                self._cache[station["Code"]] = MetrorailStation(self.api, station["Name"], station["Code"], self._lines(station),
-                    MetrorailLocation(station["Lat"], station["Lon"], MetrorailAddress(station["Address"])))
+                self._cache[station["Code"]] = MetrorailStation(
+                                                    self.api,
+                                                    station["Name"],
+                                                    station["Code"],
+                                                    self._lines(station),
+                                                    MetrorailLocation(
+                                                        station["Lat"],
+                                                        station["Lon"],
+                                                        MetrorailAddress(station["Address"])
+                                                    )
+                                               )
 
         self._fix_cache()
         return self._cache
@@ -156,9 +182,17 @@ class MetrorailStations:
 
         maybe_data = list(filter(lambda k: k["Code"] == station_code, self._raw_json))
         if len(maybe_data) > 0:
-            self._cache[station_code] = MetrorailStation(self.api, maybe_data[0]["Name"], station_code, self._lines(maybe_data[0]),
-                                            MetrorailLocation(maybe_data[0]["Lat"], maybe_data[0]["Lon"],
-                                            MetrorailAddress(maybe_data[0]["Address"])))
+            self._cache[station_code] = MetrorailStation(
+                                            self.api,
+                                            maybe_data[0]["Name"],
+                                            station_code,
+                                            self._lines(maybe_data[0]),
+                                            MetrorailLocation(
+                                                maybe_data[0]["Lat"],
+                                                maybe_data[0]["Lon"],
+                                                MetrorailAddress(maybe_data[0]["Address"])
+                                            )
+                                        )
 
         self._raw_json = self.api.get_json(build_url(Service.rail, "jStations"))["Stations"]
         return self.__getitem__(station_code)
@@ -193,6 +227,12 @@ class MetrorailLine:
 
     def __repr__(self):
         return "%s Line (%s)" % (self.friendly_name, self.line_code)
+
+    @classmethod
+    def is_valid(line_str):
+        if line_str is None or len(line_str) < 2 or line_str == "No":
+            return False
+        return True
 
     stations = property(_stations)
 
@@ -307,14 +347,19 @@ class MetrorailSystem:
         data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/All"), nocache=True)["Trains"]
         result = {}
         for prediction in data:
-            if prediction["LocationCode"] is None or prediction["DestinationCode"] is None:
+            if prediction["LocationCode"] is None or prediction["DestinationCode"] is None or prediction["Car"] is None:
                 continue
             if self.api.stations[prediction["LocationCode"]] not in result:
                 result[self.api.stations[prediction["LocationCode"]]] = []
             result[self.api.stations[prediction["LocationCode"]]].append(
-                MetrorailTrainPrediction(self.api.lines[prediction["Line"]],
-                self.api.stations[prediction["DestinationCode"]],
-                self.api.stations[prediction["LocationCode"]], prediction["Min"]))
+                MetrorailTrainPrediction(
+                    self.api.lines[prediction["Line"]],
+                    self.api.stations[prediction["DestinationCode"]],
+                    self.api.stations[prediction["LocationCode"]],
+                    prediction["Min"],
+                    prediction["Car"]
+                )
+            )
         return result
 
 class MetroApi:

@@ -17,8 +17,8 @@ def find_add(line, stat, lata, longa):
 
 def point_calc(lata, longa):
     i = 0.0
-    for s in wmata.lines:
-        for staa in s:
+    for s in wmata.lines.all:
+        for staa in wmata.lines[s].stations:
             i += find_add(s, staa, lata, longa)
     return i
 
@@ -36,7 +36,7 @@ def f_range(mini, maxi, step):
 
 
 def calc_trainfreq(m):
-    return 0
+    return 1
 
 
 def samplerunfullcity():

@@ -228,7 +228,7 @@ class MetrorailLine:
 
     @property
     def destinations(self):
-        return [self.api.stations[code] for code in self.destination_codes]
+        return [self.api.stations[code] for code in self.destination_codes] 
     
 
     def _get_path(self):
@@ -389,8 +389,9 @@ class MetrorailSystem:
 
         all_stations = self.api.stations.all
         for station in all_stations:
-            if station not in result:
-                result[all_stations[station]] = []
+            st = all_stations[station]
+            if st not in result:
+                result[st] = []
         return result
 
 class MetroApi:

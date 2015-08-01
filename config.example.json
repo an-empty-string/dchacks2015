@@ -1,3 +1,5 @@
 {
-    "WMATA_API_KEY": "your api key here"
+    "WMATA_API_KEY": "your api key here",
+    "REDIS_HOST": "dchacks.fwilson.me",
+    "REDIS_PASSWORD": "your redis password goes here"
 }

@@ -369,6 +369,9 @@ class MetrorailSystem:
         path.reverse()
         return self._collapse_same_line_stations(path)
 
+    def predictions(self):
+        return sum(list(self.all_trains().values()), [])
+
     def all_trains(self):
         data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/All"), nocache=True)["Trains"]
         result = {}

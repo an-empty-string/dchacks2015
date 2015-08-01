@@ -1,6 +1,7 @@
 import json
 import utils.metro
-with f as open("config.json"):
+
+with open("config.json") as f:
     config = json.load(f)
 
 redis_info = {"host": config["REDIS_HOST"], "password": config["REDIS_PASSWORD"]}

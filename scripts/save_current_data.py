@@ -9,6 +9,9 @@ import os.path
 
 all_trains = wmata.rail_system.predictions()
 
+
+ts = datetime.now()
+
 for train in all_trains:
     next_station = train.station.station_code
     dest_station = train.destination.station_code
@@ -16,8 +19,6 @@ for train in all_trains:
 
     cars = train.cars
     time = train.time_int
-
-    ts = datetime.now()
 
     print(next_station, time, line_code, dest_station, cars)
 

@@ -9,9 +9,9 @@ def find_dist(stat, lata, longa):
     return hypot(dx,dy)
 
 
-def find_add(stat, lata, longa):
+def find_add(line, stat, lata, longa):
     wa = find_dist(stat, lata, longa)
-    const = 1  # fix this later- this is what you need to solve!!!
+    const = 1 / calc_trainfreq(line)
     return const/(wa**2)
 
 
@@ -19,7 +19,7 @@ def point_calc(lata, longa):
     i = 0.0
     for s in wmata.lines:
         for staa in s:
-            i += find_add(staa, lata, longa)
+            i += find_add(s, staa, lata, longa)
     return i
 
 
@@ -33,3 +33,15 @@ def f_range(mini, maxi, step):
     while mini < maxi:
         yield mini
         mini += step
+
+
+def calc_trainfreq(m):
+    return 0
+
+
+def samplerunfullcity():
+    point_map(38.755377, 39.130282, -77.314407, -76.829635, .001)
+    print("Done")
+
+if __name__ == '__main__':
+    samplerunfullcity()

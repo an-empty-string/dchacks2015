@@ -1,5 +1,8 @@
 {
     "WMATA_API_KEY": "your api key here",
     "REDIS_HOST": "dchacks.fwilson.me",
-    "REDIS_PASSWORD": "your redis password goes here"
+    "REDIS_PASSWORD": "your redis password goes here",
+    "POSTGRES_HOST": "dchacks.fwilson.me",
+    "POSTGRES_USER": "dchacks",
+    "POSTGRES_PASSWORD": "your postgres password goes here"
 }

@@ -71,6 +71,7 @@ class MetrorailTrainPrediction:
         self.destination = destination
         self.station = station
         self.time = time
+        self.time_int = self.time_format(time)
         self.cars = self.car_format(car)
 
     def car_format(self, car):
@@ -79,6 +80,13 @@ class MetrorailTrainPrediction:
         if car == "-":
             return 6
         return int(car)
+
+    def time_format(self, time):
+        if time == "ARR":
+            return 1
+        if time == "BRD":
+            return 0
+        return int(time)
 
     def __repr__(self):
         return "%i-car train on %s arriving in %smin to %s (destination is %s)" % (self.cars, self.line, self.time, self.station, self.destination)

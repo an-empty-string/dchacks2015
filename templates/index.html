@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Metryx - Washington DC</title>
+        <title>Metryx: DC Metro Transit Tools</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=1">
     <link rel="stylesheet" type="text/css" href="/static/spinner.css" />
 
@@ -16,6 +16,7 @@
     <link rel="shortcut icon" type="image/png" href="/static/map-icon.png" />
     <link rel="icon" type="image/png" href="/static/map-icon.png" />
     
+    <meta name="description" content="Metryx is an innovative tool for DC Metro users. It provides essential information for both new and experienced riders alike – including Metro accessibility heatmaps, station predictions, and real-time train location information." />
 
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -731,10 +732,26 @@ checkboxInit = function() {
 
 searchInit = function() {
     var q = $("#search-box");
-    q.on("keyup", function() {
+    q.on("keyup", function(e) {
         $("#search-close").show();
         var val = $(this).val();
         doSearch(val);
+        if(e.keyCode == 13) {
+            console.debug("clicking");
+            var results = $("#search-results > .result:not(.jump)");
+            if(results.length == 1) {
+                results.eq(0).click();
+                clearSearch();
+            } else if(results.length == 0) {
+                $("#search-results > .result.jump").eq(0).click();
+                clearSearch();
+            } else console.info("There is more than one item to possibly select!");
+        }
+    }).on("blur", function() {
+        var val = $(this).val();
+        if(val.length < 1 || val == null) {
+            clearSearch();
+        }
     });
     q.focus();
 }
@@ -744,7 +761,10 @@ doSearch = function(q) {
 
     if(q.length < 1) {
         closeSearch();
+        return;
     }
+
+    $("#search-close").show();
 
     var res_html = "";
     if(railMarkersVisible) {
@@ -768,7 +788,7 @@ doSearch = function(q) {
 
         for(var i=0; i<res.length; i++) {
             var st = res[i];
-            res_html += "<div class='result' onclick='stationWindow(railStations[\"" + st.station_code + "\"])'>" +
+            res_html += "<div class='result station' onclick='stationWindow(railStations[\"" + st.station_code + "\"])'>" +
                         "<i class='fa fa-train fa-xs'></i> Station: " + st.name + " (" + st.lines.join(', ')+")</div>";
         }
     }
@@ -788,14 +808,16 @@ doSearch = function(q) {
 
         for(var i=0; i<res.length; i++) {
             var s = res[i];
-            res_html += "<div class='result' onclick='busWindow(busStations[\"" + s.stop_id + "\"])'>" +
+            res_html += "<div class='result bus' onclick='busWindow(busStations[\"" + s.stop_id + "\"]);closeSearch()'>" +
                         "<i class='fa fa-bus fa-xs'></i> Stop: " + s.name + " (" + s.routes.join(', ') + ")</div>";
         }
     }
 
-    res_html += "<div class='result' onclick='searchJump()'>Jump to location: " + q + "</div>";
+    res_html += "<div class='result jump' onclick='searchJump()'>Jump to location: " + q + "</div>";
 
     r.html(res_html);
+
+    r[0].scrollTop = r[0].scrollHeight;
 }
 
 closeSearch = function() {
@@ -810,6 +832,7 @@ searchJump = function() {
     geocoder.geocode( { 'address': q}, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
       map.setCenter(results[0].geometry.location);
+      map.setZoom(15);
       var marker = new google.maps.Marker({
           map: map,
           position: results[0].geometry.location

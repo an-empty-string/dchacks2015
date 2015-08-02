@@ -166,6 +166,24 @@ function init() {
     });
     busHeat.setMap(map);
 
+    var gradient = [
+        'rgba(103, 147, 237, 0)',
+        'rgba(103, 147, 237, 1)',
+        'rgba(114, 135, 236, 1)',
+        'rgba(125, 123, 235, 1)',
+        'rgba(136, 110, 235, 1)',
+        'rgba(147, 98, 234, 1)',
+        'rgba(158, 86, 233, 1)',
+        'rgba(169, 73, 233, 1)',
+        'rgba(180, 61, 232, 1)',
+        'rgba(191, 49, 231, 1)',
+        'rgba(202, 36, 231, 1)',
+        'rgba(213, 24, 230, 1)',
+        'rgba(224, 12, 229, 1)',
+        'rgba(235, 0, 229, 1)'
+    ]
+    railHeat.set('gradient', railHeat.get('gradient') ? null : gradient);
+
 
     google.maps.event.addListener(map, 'zoom_changed', function () {
         map.setOptions({radius:getNewRadius(map)});

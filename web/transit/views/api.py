@@ -140,4 +140,4 @@ def _bus_stop_fmt(stop):
     return data
 
 def get_bus_stop_info(stop):
-    return jsonify(stop=_bus_stop_fmt(stop))
+    return jsonify(predictions=_bus_stop_fmt(stop))

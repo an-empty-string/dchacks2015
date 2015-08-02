@@ -56,7 +56,7 @@ html, body, #map-canvas {
     top: 0;
     left: 75px;
     width: calc(100% - 75px - 160px);
-    min-height: 120px;
+    min-height: 200px;
     background: rgba(242, 242, 242, 0.9);
     z-index: 10;
 }
@@ -86,13 +86,32 @@ html, body, #map-canvas {
     font-size: 24px;
     position: absolute;
     top: 50%;
-    margin-top: -50px;
+    margin-top: -80px;
+    max-width: 250px;
+}
+
+#station-info.bus .title,
+#station-info.bus .lines {
+    max-width: 400px;
+}
+
+#station-info.bus .right-info {
+    width: calc(100% - 430px)
+}
+
+#station-info.bus {
+    min-height: 250px;
 }
 
 .lines {
     position: absolute;
     top: 50%;
     margin-top: 0;
+    max-width: 250px;
+}
+
+.lines .line {
+    margin-bottom: 5px;
 }
 
 .line {

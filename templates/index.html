@@ -275,6 +275,15 @@ function pageLoadedHooks() {
             }
         }
 
+        if(location.hash.indexOf('#stop=') != -1) {
+            var code = location.hash.split('#stop=')[1];
+            if(code in busStops) {
+                addBusStopMarkers();
+                $(".bus-stations-icon").attr("data-checked", "true");
+                busWindow(busStops[code]);
+            }
+        }
+
         searchInit();
         checkboxInit();
         addStationMarkers();
@@ -310,6 +319,7 @@ function stationWindow(station) {
 
 
     var div = $("#station-info");
+    div.addClass("rail").removeClass("bus");
     $(".title", div).html("<i class='fa fa-train'></i> " + station["name"]);
 
     var line_html = "<span>" + station.lines.length +" line" + (station.lines.length == 1 ? '' : 's') + ":</span><br />";
@@ -319,6 +329,8 @@ function stationWindow(station) {
     }
 
     $(".lines", div).html(line_html);
+
+    $("thead > tr", div).html("<th>Line</th><th>Cars</th><th>Destination</th><th>Mins</th><th>Arrival</th>");
 
     $("tbody", div).html("<tr><td></td><td></td><td>"+LOADING_SPINNER+"</td></tr>");
 
@@ -369,6 +381,85 @@ function stationWindowClose() {
     var div = $("#station-info");
     div.hide();
     location.hash = '';
+}
+
+function findBus(loc) {
+    var ids = Object.keys(busStops);
+    var stop = null;
+    for(var i=0; i<ids.length; i++) {
+        var id = ids[i];
+        var st = busStops[id];
+        if(st["loc"] == loc) {
+            stop = st;
+            break;
+        }
+    }
+    if(!stop) console.error("Couldn't find bus stop at "+loc);
+    return stop;
+}
+
+
+function busWindow(stop) {
+    if(stop == null) return;
+    console.log(stop);
+    location.hash = '#stop=' + stop.stop_id;
+
+
+    var div = $("#station-info");
+    div.addClass("bus").removeClass("rail");
+    $(".title", div).html("<i class='fa fa-bus'></i> " + stop["name"]);
+
+    var line_html = "<span>" + stop.routes.length +" route" + (stop.routes.length == 1 ? '' : 's') + ":</span><br />";
+    for(var i=0; i<stop.routes.length; i++) {
+        var ln = stop.routes[i];
+        line_html += "<span class='line grey'>" + ln + "</span>";
+    }
+
+    $(".lines", div).html(line_html);
+
+    $("thead > tr", div).html("<th>Route</th><th>Bus</th><th>Destination</th><th>Mins</th><th>Arrival</th>");
+
+    $("tbody", div).html("<tr><td></td><td></td><td>"+LOADING_SPINNER+"</td></tr>");
+
+    map.setZoom(14);
+    map.panTo(stop.loc);
+
+    div.show();
+
+    $.get("/api/bus/stop/" + stop.stop_id, {}, function(d) {
+        var buses = JSON.parse(d);
+        buses = buses["predictions"];
+
+        var buses_html = "";
+
+        for(var i=0; i<buses.length; i++) {
+            var b = buses[i];
+            var mins = min = b.time;
+            
+            var tm = parseInt(+new Date);
+            if(parseInt(min) != NaN) {
+                tm += 60 * parseInt(min) * 1000;
+            }
+            var time = new Date(tm),
+            h = (time.getHours() > 12 ? time.getHours() - 12 : time.getHours() == 0 ? 12 : time.getHours()),
+            m = time.getMinutes(),
+            timearr = h+":"+(m<10 ? "0"+m : m);
+            console.debug(tm, time, timearr);
+
+            buses_html += "<tr><td class='line-row'>" +
+                            "<span class='line grey'>" + b.routeID + "</span>" +
+                            "</td><td class='car-row'>" + b.vehicleID + "</td>" +
+                            "<td class='dest-row'>" + b.direction + "</td>" +
+                            "<td class='time-row'>" + b.time + "</td>" +
+                            "<td class='arr-row'>" + timearr + "</td></tr>";
+        }
+
+        if(buses.length == 0) {
+            buses_html += "<tr><td colspan=5><center>There are no buses visible at this time.</center></td></tr>";
+        }
+
+        $("tbody", div).html(buses_html);
+    }, "text");
 }
 
 
@@ -574,6 +665,10 @@ searchInit = function() {
 doSearch = function(q) {
     var r = $("#search-results");
 
+    if(q.length < 1) {
+        closeSearch();
+    }
+
     var res_html = "";
     if(railMarkersVisible) {
         var codes = Object.keys(railStations);
@@ -660,6 +755,9 @@ searchJump = function() {
 
     <body>
         <div id="loading">
+        <div style="position:absolute">
+            <h2 style="font-weight: 100;font-size: 30px;position:relative;top:-50px">Metryx</h2>
+        </div>
             <center>
             <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66">
                <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>

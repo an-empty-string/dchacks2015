@@ -16,8 +16,6 @@ class DistanceCalculations:
         print(self.lat1, self.lat2, self.lon1, self.lon2, self.res)
         self.latlist = list(f_range(self.lat1, self.lat2, self.res))
         self.lonlist = list(f_range(self.lon1, self.lon2, self.res))
-        print(self.lonlist)
-        print(self.latlist)
 
 
     def find_dist(self, stat, lata, longa):
@@ -49,12 +47,45 @@ class DistanceCalculations:
         return dict(zip(self.latlist, single_lat_dict_list))
     
     def singlelat(self, lat):
-        return {lon: self.point_calc(lat, lon) for lon in self.lonlist}
+        x = {lon: self.point_calc(lat, lon) for lon in self.lonlist}
+        print("lat done: " + str(lat))
+        return x
+
     
     
 def calc_trainfreq(m):
    return 1   
-    
+
+def samplerunbeltway():
+    max_lon = 39.008953
+    min_lon = 38.823838
+    max_lat = -76.872716
+    min_lat = -77.204129
+    resi = .001
+    distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
+    distance_calc_obj.point_map()
+    print("Done")
+
+def sampleruninnercity():
+    max_lon = 38.951372
+    min_lon = 38.869972
+    max_lat = -76.982933
+    min_lat = -77.982933
+    resi = .001
+    distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
+    distance_calc_obj.point_map()
+    print("Done")
+
+def sampleruntiny():
+    max_lon = 38.917349
+    min_lon = 38.875307
+    max_lat = -77.003089
+    min_lat = -77.051867
+    resi = .001
+    distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
+    distance_calc_obj.point_map()
+    print("Done")
+
 def samplerunfullcity():
     max_lon = 39.130282
     min_lon = 38.755377

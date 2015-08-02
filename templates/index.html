@@ -131,7 +131,8 @@ function init() {
     var mapOptions = {
         zoom: 10,
         center: new google.maps.LatLng(38.904815, -77.016190),
-        mapTypeId: google.maps.MapTypeId.MAP
+        mapTypeId: google.maps.MapTypeId.MAP,
+        maxZoom: 10
     };
 
     map = new google.maps.Map(document.getElementById('map-canvas'),
@@ -149,21 +150,24 @@ function init() {
         heatmap.setOptions({radius:getNewRadius()});
     });
 
+    addStationMarkers();
+
 
 }
 
-function toggleHeatmap() {
-    heatmap.setMap(heatmap.getMap() ? null : map);
-}
-function changeGradient() {
-    var gradient = [];
-    heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
-}
-function changeRadius() {
-    heatmap.set('radius', heatmap.get('radius') ? null : 0.005);
-}
-function changeOpacity() {
-    heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
+function addStationMarkers() {
+    var codes = Object.keys(railStations);
+    for(var i=0; i<codes.length; i++) {
+        var code = codes[i];
+        var station = railStations[code];
+        var circle = new google.maps.Circle({
+            radius: 200,
+            fillColor: "blue",
+            strokeOpacity: 0,
+            center: station.loc
+        });
+        circle.setMap(map);
+    }
 }
 
 google.maps.event.addDomListener(window, 'load', function() {
@@ -172,13 +176,20 @@ google.maps.event.addDomListener(window, 'load', function() {
         var rail = data["metrorail"];
         for(var i=0; i<rail.length; i++) {
             var pt = rail[i];
+            var loc = new google.maps.LatLng(
+                    parseFloat(pt["lat"]), parseFloat(pt["lon"]));
             latData.push({
-                location: new google.maps.LatLng(
-                    parseFloat(pt["lat"]), parseFloat(pt["lon"])),
+                location: loc,
                 weight: parseFloat(pt["weight"])
             });
 
-            railStations[pt.station_code] = pt;
+            if(!railStations.hasOwnProperty(pt.station_code)) {
+                pt["lines"] = [pt["line"]];
+                pt["loc"] = loc;
+                railStations[pt.station_code] = pt;
+            } else {
+                railStations[pt.station_code]["lines"].push(pt["line"]);
+            }
         }
 
         var bus = data["metrobus"];

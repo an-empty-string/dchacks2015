@@ -7,7 +7,7 @@ with open('stops.csv', 'r') as csvfile:
     rlist = list(reader)
     rlist.pop(0)
     for x in rlist:
-        csvdata.append([float(x[5]), float(x[6]), 1/30])
+        csvdata.append([float(x[4]), float(x[5]), 1/30])
 for s in wmata.lines.all:
     for staa in wmata.lines[s].stations:
         if s == 'RD':
@@ -19,6 +19,6 @@ for s in wmata.lines.all:
         csvdata.append((staa.location.lat, staa.location.lon, 5/headway))
 
 stringydata = "\n".join([",".join(list(map(str, i))) for i in csvdata])
-with open("data2.csv", "w") as f:
+with open("gen/data2.csv", "w") as f:
     f.write(stringydata)
 print("Done")

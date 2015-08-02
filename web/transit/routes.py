@@ -10,8 +10,12 @@ routes = (
 )
 
 @app.route('/gen/<path:path>')
-def staticfiles(path):
+def genfiles(path):
     return send_from_directory('gen', path)
+
+@app.route('/static/<path:path>')
+def genstatic(path):
+    return send_from_directory('static', path)
 
 for route, endpoint in routes:
     app.add_url_rule(route, endpoint.__name__, endpoint)

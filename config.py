@@ -7,7 +7,7 @@ with open("config.json") as f:
 
 redis_info = {"host": config["REDIS_HOST"], "password": config["REDIS_PASSWORD"]}
 print("Connecting to WMATA API..")
-wmata = utils.metro.MetroApi(config["API_KEY"], redis_info)
+wmata = utils.metro.MetroApi(config["API_KEY"], redis_info=redis_info)
 print("Connecting to DB..")
 db = PostgresqlDatabase(config["POSTGRES_USER"], host=config["POSTGRES_HOST"],
                         user=config["POSTGRES_USER"],

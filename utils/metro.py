@@ -125,7 +125,7 @@ class MetrorailStation:
                     i["Car"]
                 ) for i in data if (
                     i["DestinationCode"] is not None and
-                    MetrorailLine.is_valid(i["Line"]) and
+                    MetrorailLines._line_valid(i["Line"]) and
                     i["Car"] is not None
                 )]
 
@@ -249,12 +249,6 @@ class MetrorailLine:
     def __repr__(self):
         return "%s Line (%s)" % (self.friendly_name, self.line_code)
 
-    @classmethod
-    def is_valid(line_str):
-        if line_str is None or len(line_str) < 2 or line_str == "No":
-            return False
-        return True
-
     stations = property(_stations)
 
 class MetrorailLines:
@@ -262,6 +256,12 @@ class MetrorailLines:
         self.api = api
         self._cache = {}
         self._raw_json = {}
+
+
+    def _line_valid(line_str):
+        if line_str is None or len(line_str) < 2 or line_str == "No":
+            return False
+        return True
 
     def _all(self):
         if self._raw_json:

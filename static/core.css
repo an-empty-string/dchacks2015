@@ -63,26 +63,26 @@ html, body, #map-canvas {
     margin-right: 20px;
 }
 
-.line.rd {
+.line.RD {
     color: #BF1237;
 }
 
-.line.bl {
+.line.BL {
     color: #0993D5;
 }
 
-.line.gr {
+.line.GR {
     color: #00AF51;
 }
 
-.line.or {
+.line.OR {
     color: DD8602;
 }
 
-.line.sv {
+.line.SV {
     color: #A0A2A0;
 }
 
-.line.yl {
+.line.YL {
     color: #F6D316;
 }

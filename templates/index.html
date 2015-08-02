@@ -235,6 +235,14 @@ function stationWindow(loc) {
 
     var div = $("#station-info");
     $("h2", div).html(station["name"]);
+
+    var line_html = "";
+    for(var i=0; i<station.lines.length; i++) {
+        var ln = station.lines[i];
+        line_html += "<span class='line " + ln +"'>" + ln + "</span>";
+    }
+
+    $("h3", div).html(line_html);
     div.show();
 
 }

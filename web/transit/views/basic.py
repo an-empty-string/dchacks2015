@@ -15,7 +15,9 @@ def _line_fmt(line):
     }
 
 def get_all_trains():
+    print("Loading predictions..")
     predictions = wmata.rail_system.predictions()
+    print("Done")
     output = []
     for tr in predictions:
         output.append({
@@ -24,12 +26,14 @@ def get_all_trains():
             "cars": tr.cars,
             "line": _line_fmt(tr.line),
             "time": tr.time,
-            "time_int": tr.time_int
+            "time_int": tr.time_in
         })
     return jsonify(predictions=output)
 
 def get_trains_on_line(line):
+    print("Loading predictions")
     predictions = wmata.rail_system.predictions()
+    print("Done")
     output = []
     for tr in predictions:
         if tr.line.line_code == line:
@@ -44,7 +48,9 @@ def get_trains_on_line(line):
     return jsonify(predictions=output)
 
 def get_trains_at_station(station_code):
+    print("Loading predictions")
     predictions = wmata.rail_system.all_trains()
+    print("Done")
     output = []
     if station_code in wmata.stations:
         station = wmata.stations[line_code]

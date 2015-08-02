@@ -21,7 +21,7 @@ html, body, #map-canvas {
     background: rgba(242, 242, 242, 0.8);
     padding: 20px;
     width: 191px;
-    height: 117px;
+    height: 147px;
 }
 
 #panel {
@@ -235,4 +235,16 @@ html, body, #map-canvas {
     position: relative;
     margin-left: -15px;
     background: #f0f0f0;
+}
+
+.loading h1 {
+    font-weight: 100;
+    margin-top: -20px;
+}
+
+h1.logo {
+    font-weight: 100;
+    position: absolute;
+    bottom: 0;
+    center: 0;
 }

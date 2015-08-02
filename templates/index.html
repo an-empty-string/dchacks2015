@@ -160,7 +160,10 @@ function fixInfoWindow() {
 
 function drawLines(){
     $.getJSON('/api/lines/', function(data) {
-        data.lines.forEach(function(line) {
+        var goodlines = {};
+        data.lines.forEach(function(l) { goodlines[l.line_code] = l; });
+        ["OR", "SV", "BL", "YL", "GR", "RD"].forEach(function(line_code) {
+            var line = goodlines[line_code];
             var points = [];
             line.stations.forEach(function(station) {
                 points.push(new google.maps.LatLng(station.lat, station.lon));
@@ -169,12 +172,14 @@ function drawLines(){
                 path: points,
                 geodesic: false,
                 strokeColor: line.friendly_name,
-                strokeWeight: 3
+                strokeWeight: {"RD": 11, "OR": 19, "SV": 15, "BL": 11, "YL": 7, "GR": 3}[line.line_code]
             });
             pl.setMap(map);
         });
     });
-    
+}
+
+function getTrainLocations() {
 }
 
 function setupHeat(rail, bus) {
@@ -203,20 +208,20 @@ function setupHeat(rail, bus) {
 
 
     var gradient = [
-        'rgba(103, 147, 237, 0)',
-        'rgba(103, 147, 237, 1)',
-        'rgba(114, 135, 236, 1)',
-        'rgba(125, 123, 235, 1)',
-        'rgba(136, 110, 235, 1)',
-        'rgba(147, 98, 234, 1)',
-        'rgba(158, 86, 233, 1)',
-        'rgba(169, 73, 233, 1)',
-        'rgba(180, 61, 232, 1)',
-        'rgba(191, 49, 231, 1)',
-        'rgba(202, 36, 231, 1)',
-        'rgba(213, 24, 230, 1)',
-        'rgba(224, 12, 229, 1)',
-        'rgba(235, 0, 229, 1)'
+        'rgba(133, 141, 209, 0)',
+        'rgba(133, 141, 209, 1)',
+        'rgba(133, 167, 209, 1)',
+        'rgba(134, 192, 209, 1)',
+        'rgba(135, 210, 203, 1)',
+        'rgba(136, 210, 180, 1)',
+        'rgba(137, 211, 157, 1)',
+        'rgba(141, 211, 137, 1)',
+        'rgba(166, 211, 138, 1)',
+        'rgba(190, 212, 139, 1)',
+        'rgba(212, 211, 140, 1)',
+        'rgba(213, 188, 141, 1)',
+        'rgba(213, 166, 142, 1)',
+        'rgba(214, 144, 143, 1)'
     ]
     heatMap.set('gradient', heatMap.get('gradient') ? null : gradient);
 

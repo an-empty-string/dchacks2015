@@ -64,7 +64,7 @@ def samplerunbeltway():
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
     return distance_calc_obj.point_map()
-    print("Done")
+
 
 def sampleruninnercity():
     max_lon = 38.951372
@@ -74,7 +74,7 @@ def sampleruninnercity():
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
     return distance_calc_obj.point_map()
-    print("Done")
+
 
 def sampleruntiny():
     max_lon = 38.917349
@@ -84,20 +84,20 @@ def sampleruntiny():
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
     return distance_calc_obj.point_map()
-    print("Done")
+
 
 def samplerunfullcity():
-    max_lon = 39.130282
+    max_lon = 39.136673
     min_lon = 38.755377
     max_lat = -76.829635
-    min_lat = -77.314407
+    min_lat = -77.288315
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
     return distance_calc_obj.point_map()
-    print("Done")
-    
+
+
 if __name__ == '__main__':
-    data = sampleruninnercity()
+    data = samplerunfullcity()
     csvdata = []
     for lat in data:
         for lon in data[lat]:
@@ -106,5 +106,4 @@ if __name__ == '__main__':
     stringydata = "\n".join([",".join(list(map(str, i))) for i in csvdata])
     with open("data.csv", "w") as f:
         f.write(stringydata)
-
     print("Done")

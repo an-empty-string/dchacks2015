@@ -3,6 +3,7 @@ import operator
 import redis
 import json
 from functools import reduce
+from models import HistoricalTrainPosition
 
 class Service:
     bus = "Bus"
@@ -116,18 +117,28 @@ class MetrorailStation:
 
     def trains(self):
         station_codes = [i.station_code for i in self.api.stations.all.values() if i == self]
-        data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/%s" % ",".join(station_codes)), nocache=True)["Trains"]
-        return [MetrorailTrainPrediction(
-                    self.api.lines[i["Line"]],
-                    self.api.stations[i["DestinationCode"]],
-                    self,
-                    i["Min"],
-                    i["Car"]
-                ) for i in data if (
-                    i["DestinationCode"] is not None and
-                    MetrorailLines._line_valid(i["Line"]) and
-                    i["Car"] is not None
-                )]
+        if not self.api.timestamp:
+            data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/%s" % ",".join(station_codes)), nocache=True)["Trains"]
+            return [MetrorailTrainPrediction(
+                        self.api.lines[i["Line"]],
+                        self.api.stations[i["DestinationCode"]],
+                        self,
+                        i["Min"],
+                        i["Car"]
+                    ) for i in data if (
+                        i["DestinationCode"] is not None and
+                        MetrorailLines._line_valid(i["Line"]) and
+                        i["Car"] is not None
+                    )]
+        else:
+            data = list(HistoricalTrainPosition.select().where(HistoricalTrainPosition.timestamp == self.api.timestamp, HistoricalTrainPosition.next_station << station_codes))
+            return [MetrorailTrainPrediction(
+                self.api.lines[prediction.line_code],
+                self.api.stations[prediction.dest_station],
+                self,
+                str(prediction.time),
+                str(prediction.cars)
+            ) for prediction in data]
 
     def _lines(self):
         return {self.api.lines[code] for code in self._line_codes}
@@ -384,29 +395,40 @@ class MetrorailSystem:
         return sum(list(self.all_trains().values()), [])
 
     def all_trains(self):
-        data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/All"), nocache=True)["Trains"]
-        result = {}
-        for prediction in data:
-            if prediction["LocationCode"] is None or prediction["DestinationCode"] is None or prediction["Car"] is None:
-                continue
-            if self.api.stations[prediction["LocationCode"]] not in result:
-                result[self.api.stations[prediction["LocationCode"]]] = []
-            result[self.api.stations[prediction["LocationCode"]]].append(
-                MetrorailTrainPrediction(
-                    self.api.lines[prediction["Line"]],
-                    self.api.stations[prediction["DestinationCode"]],
-                    self.api.stations[prediction["LocationCode"]],
-                    prediction["Min"],
-                    prediction["Car"]
+        if not self.api.timestamp:
+            data = self.api.get_json(build_url(Service.rail_predictions, "GetPrediction/All"), nocache=True)["Trains"]
+            result = {}
+            for prediction in data:
+                if prediction["LocationCode"] is None or prediction["DestinationCode"] is None or prediction["Car"] is None:
+                    continue
+                if self.api.stations[prediction["LocationCode"]] not in result:
+                    result[self.api.stations[prediction["LocationCode"]]] = []
+                result[self.api.stations[prediction["LocationCode"]]].append(
+                    MetrorailTrainPrediction(
+                        self.api.lines[prediction["Line"]],
+                        self.api.stations[prediction["DestinationCode"]],
+                        self.api.stations[prediction["LocationCode"]],
+                        prediction["Min"],
+                        prediction["Car"]
+                    )
                 )
-            )
 
-        all_stations = self.api.stations.all
-        for station in all_stations:
-            st = all_stations[station]
-            if st not in result:
-                result[st] = []
-        return result
+            all_stations = self.api.stations.all
+            for station in all_stations:
+                st = all_stations[station]
+                if st not in result:
+                    result[st] = []
+            return result
+        else:
+            data = list(HistoricalTrainPosition.select().where(HistoricalTrainPosition.timestamp == self.api.timestamp))
+            predictions = [MetrorailTrainPrediction(
+                self.api.lines[prediction.line_code],
+                self.api.stations[prediction.dest_station],
+                self.api.stations[prediction.next_station],
+                str(prediction.time),
+                str(prediction.cars)
+            ) for prediction in data]
+            return dict((p.station, p) for p in predictions)
 
 class MetroApi:
     def __init__(self, api_key, timestamp=None, redis_info={}):

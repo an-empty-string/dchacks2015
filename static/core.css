@@ -39,6 +39,7 @@ html, body, #map-canvas {
 
 #panel > span {
     line-height: 30px;
+    margin-left: 13px;
 }
 
 #panel > span > i {
@@ -186,6 +187,14 @@ html, body, #map-canvas {
     width: 100%;
     height: 100%;
     font-size: 20px;
+}
+
+#search-close {
+    display: none;
+    position: absolute;
+    right: -30px;
+    bottom: 3px;
+    cursor: pointer;
 }
 
 #search-results {

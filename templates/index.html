@@ -110,7 +110,7 @@ var busLat = [];
 var busCircles = {};
 
 
-
+var geocoder;
 var map;
 var heatMap;
 
@@ -133,6 +133,7 @@ function init() {
 
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
+    geocoder = new google.maps.Geocoder();
 
     setupHeat(true, true);
     drawLines();
@@ -522,6 +523,7 @@ checkboxInit = function() {
 searchInit = function() {
     var q = $("#search-box");
     q.on("keyup", function() {
+        $("#search-close").show();
         var val = $(this).val();
         doSearch(val);
     });
@@ -577,7 +579,38 @@ doSearch = function(q) {
                         "<i class='fa fa-bus fa-xs'></i> Stop: " + s.name + " (" + s.routes.join(', ') + ")</div>";
         }
     }
+
+    res_html += "<div class='result' onclick='searchJump()'>Jump to location: " + q + "</div>";
+
     r.html(res_html);
+}
+
+closeSearch = function() {
+    $("#search-results").html("");
+    $("#search-box").val("");
+    $("#search-close").hide();
+}
+var search_markers = [];
+searchJump = function() {
+    var q = $("#search-box").val();
+    geocoder.geocode( { 'address': q}, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      map.setCenter(results[0].geometry.location);
+      var marker = new google.maps.Marker({
+          map: map,
+          position: results[0].geometry.location
+      });
+      search_markers.push(marker);
+      google.maps.event.addListener(marker, 'click', function(event) {
+        for(var i=0; i<search_markers.length; i++) {
+            search_markers[i].setMap(null);
+        }
+      })
+      closeSearch();
+    } else {
+      console.error('Geocode was not successful for the following reason: ' + status);
+    }
+  });
 }
 
         </script>
@@ -596,6 +629,7 @@ doSearch = function(q) {
         <div id="search">
             <div id="search-results"></div>
             <input type="text" placeholder="Search for a station or location..." id="search-box" value="" />
+            <div id="search-close" onclick="closeSearch()"><i class='fa fa-times fa-2x'></i></div>
         </div>
 
         <div id="station-info">

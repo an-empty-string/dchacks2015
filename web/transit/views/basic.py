@@ -52,7 +52,7 @@ def get_trains_at_station(station_code):
     predictions = wmata.rail_system.all_trains()
     print("Done")
     output = []
-    if station_code in wmata.stations:
+    if station_code in wmata.stations.all:
         station = wmata.stations[line_code]
 
         if station in predictions:

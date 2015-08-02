@@ -132,11 +132,16 @@ function init() {
         zoom: 10,
         center: new google.maps.LatLng(38.904815, -77.016190),
         mapTypeId: google.maps.MapTypeId.MAP
+        styles: [{
+            stylers: [{
+                saturation: -100
+            }]
+        }]
     };
+    var container = document.getElementById('map_canvas');
 
     map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
-
     var pointArray = new google.maps.MVCArray(latData);
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: pointArray,

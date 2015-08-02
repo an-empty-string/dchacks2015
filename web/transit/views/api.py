@@ -1,4 +1,5 @@
 from flask import jsonify
+from models import CurrentTrainPosition
 from config import wmata
 
 def _station_fmt(station):
@@ -95,3 +96,11 @@ def get_stations():
 def get_lines():
     return jsonify(lines=[_line(i) for i in wmata.lines.all.values()])
 
+def get_train_positions():
+    trains = list(CurrentTrainPosition.select())
+    data = []
+    for i in trains:
+        data.append(dict(near=_station_fmt(wmata.stations[i.station_near]),
+                         far=_station_fmt(wmata.stations[i.station_far]),
+                         fraction=i.fraction))
+    return jsonify(data=data)

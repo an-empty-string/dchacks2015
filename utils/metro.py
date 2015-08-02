@@ -1,3 +1,4 @@
+import collections
 import requests
 import operator
 import redis
@@ -67,10 +68,32 @@ class MetrorailRoute:
         return "Start at %s\n%sEnd at %s\n\n%s" % (start, transfer_string, end, self.meta)
 
 class MetrorailTrainPrediction:
-    def __init__(self, line, destination, station, time, car):
+    def __init__(self, line, destination, station, time, car, trackgroup):
         self.line = line
         self.destination = destination
         self.station = station
+        self.trackgroup = trackgroup
+
+        temp_lines = list(set(self.destination.lines) & set(self.station.lines))
+        if temp_lines:
+            temp_line = temp_lines[0]
+        else:
+            self.destination = self.line.stations[-1 if self.trackgroup == 1 else 0]
+            temp_line = list(set(self.destination.lines) & set(self.station.lines))[0]
+
+        if self.destination == self.station:
+            if self.station in [temp_line[0], temp_line[-1]]:
+                self.direction_dest = self.station
+            else:
+                self.direction_dest = temp_line.stations[-1 if self.trackgroup == 1 else 0]
+        else:
+            self.direction_dest = temp_line.stations[-1 if self.trackgroup == 1 else 0]
+
+        self.previous_station = None
+        previous_station_idx = temp_line.stations.index(self.station) + (1 if self.trackgroup == 2 else -1)
+        if previous_station_idx > 0 and previous_station_idx < len(temp_line.stations):
+            self.previous_station = temp_line.stations[previous_station_idx]
+
         self.time = time
         self.time_int = self._time_format(time)
         self.cars = self._car_format(car)
@@ -124,7 +147,8 @@ class MetrorailStation:
                         self.api.stations[i["DestinationCode"]],
                         self,
                         i["Min"],
-                        i["Car"]
+                        i["Car"],
+                        int(i["Group"])
                     ) for i in data if (
                         i["DestinationCode"] is not None and
                         MetrorailLines._line_valid(i["Line"]) and
@@ -137,7 +161,8 @@ class MetrorailStation:
                 self.api.stations[prediction.dest_station],
                 self,
                 str(prediction.time),
-                str(prediction.cars)
+                str(prediction.cars),
+                prediction.trackgroup
             ) for prediction in data]
 
     def _lines(self):
@@ -409,7 +434,8 @@ class MetrorailSystem:
                         self.api.stations[prediction["DestinationCode"]],
                         self.api.stations[prediction["LocationCode"]],
                         prediction["Min"],
-                        prediction["Car"]
+                        prediction["Car"],
+                        prediction["Group"]
                     )
                 )
 
@@ -426,9 +452,14 @@ class MetrorailSystem:
                 self.api.stations[prediction.dest_station],
                 self.api.stations[prediction.next_station],
                 str(prediction.time),
-                str(prediction.cars)
+                str(prediction.cars),
+                prediction.trackgroup
             ) for prediction in data]
-            return dict((p.station, p) for p in predictions)
+            d = {}
+            for p in predictions:
+                if p.station not in d: d[p.station] = []
+                d[p.station].append(p)
+            return d
 
 class MetroApi:
     def __init__(self, api_key, timestamp=None, redis_info={}):

@@ -20,3 +20,8 @@ class HistoricalTrainPosition(BaseModel):
     time = IntegerField()
     timestamp = DateTimeField()
     trackgroup = IntegerField()
+
+class CurrentTrainPosition(BaseModel):
+    station_near = CharField()
+    station_far = CharField()
+    fraction = FloatField()

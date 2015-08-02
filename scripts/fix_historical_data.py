@@ -21,17 +21,14 @@ for tr in pos:
     """
                         #ShGrv, Wihle, Vnna, FrncSp, Hntgn, BchAv 
     if dest_station in ['A15', 'N06', 'K08', 'J03', 'C15', 'F11']:
-        trackgroup = 2
+        trackgroup2.append(tr.id)
                           #Glnmt, Grnblt, NCrl, Lrgo, Grnbt, MtVrn, FtTtn, FtTtn
     elif dest_station in ['B11', 'E10', 'D13', 'G05', 'F11', 'E01', 'B06', 'E06']:
-        trackgroup = 1
+        trackgroup1.append(tr.id)
 
     if trackgroup is None:
         continue
-
-    tr.trackgroup = trackgroup
     updates += 1
-    
-    tr.save()
+
 
 print(updates, "updates")

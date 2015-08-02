@@ -5,7 +5,7 @@ from ipdb import launch_ipdb_on_exception
 
 with launch_ipdb_on_exception():
     ts = datetime.strptime("2015-07-29 08:04:58", "%Y-%m-%d %H:%M:%S")
-    # wmata.timestamp = ts
+    wmata.timestamp = ts
 
     lines = list(wmata.lines.all.values())
 

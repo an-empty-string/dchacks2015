@@ -7,7 +7,7 @@ with open('stops.csv', 'r') as csvfile:
     rlist = list(reader)
     rlist.pop(0)
     for x in rlist:
-        csvdata.append([float(x[5]),float(x[6]),1/30])
+        csvdata.append([float(x[5]), float(x[6]), 1/30])
 for s in wmata.lines.all:
     for staa in wmata.lines[s].stations:
         if s == 'RD':

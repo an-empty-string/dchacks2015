@@ -3,36 +3,11 @@
     <head>
         <meta charset="utf-8" />
         <title>Metryx - Washington DC</title>
-        <style type="text/css">
-html, body, #map-canvas {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.loading {
-    /* display: none; */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: -32.5px;
-    z-index: 10;
-}
-
-#panel {
-    position: absolute;
-    top: 25px;
-    right: 0;
-    width: auto;
-    padding: 5px 10px;
-    z-index: 10;
-    line-height: 20px;
-
-    font-family: 'Roboto','Helvetica','Open Sans','sans-serif';
-    background: rgba(242, 242, 242, 0.8);
-}
-        </style>
+        <link rel="stylesheet" type="text/css" href="/static/core.css" />
         <link rel="stylesheet" type="text/css" href="/static/spinner.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization,geometry&amp;sensor=false"></script>
         <script type="text/javascript">
@@ -91,7 +66,7 @@ MercatorProjection.prototype.fromPointToLatLng = function (point) {
 
 var desiredRadiusPerPointInMeters = 700;
 function getNewRadius() {
-    console.log("Radius calc")
+    //console.log("Radius calc")
     var numTiles = 1 << map.getZoom();
     var center = map.getCenter();
     var moved = google.maps.geometry.spherical.computeOffset(center, 10000, 90); /*1000 meters to the right*/
@@ -108,7 +83,7 @@ function getNewRadius() {
     );
     var pixelsPerMeter = (Math.abs(initPoint.x-endPoint.x))/10000.0;
     var totalPixelSize = Math.floor(desiredRadiusPerPointInMeters*pixelsPerMeter);
-    console.log(totalPixelSize);
+    //console.log(totalPixelSize);
     return totalPixelSize;
  
 }
@@ -149,7 +124,26 @@ function init() {
 
     setupHeat(true, true);
 
-    addStationMarkers();
+    fixInfoWindow();
+}
+
+function fixInfoWindow() {
+    // Here we redefine the set() method.
+    // If it is called for map option, we hide the InfoWindow, if "noSuppress"  
+    // option is not true. As Google Maps does not know about this option,  
+    // its InfoWindows will not be opened.
+
+    var set = google.maps.InfoWindow.prototype.set;
+
+    google.maps.InfoWindow.prototype.set = function (key, val) {
+        if (key === 'map' && ! this.get('noSuppress')) {
+            console.warn('This InfoWindow is suppressed.');
+            console.log('To enable it, set "noSuppress" option to true.');
+            return;
+        }
+
+        set.apply(this, arguments);
+    }
 }
 
 function setupHeat(rail, bus) {
@@ -203,18 +197,47 @@ function setupHeat(rail, bus) {
         heatMap.setOptions({radius:getNewRadius()});
     });
 
-    google.maps.event.addListenerOnce(map, 'idle', function(){
+    google.maps.event.addListenerOnce(map, 'tilesloaded', function(){
         // loaded fully
+        console.debug('tilesloaded')
         endLoad();
+        $("#panel").show();
     });
 
-    heatMap.setMap(map);
+
+    //heatMap.setMap(map);
+
+    addStationMarkers();
 }
 
 var railVisible = true;
 var railMarkersVisible = true;
 var busVisible = false;
 var busMarkersVisible = false;
+
+function stationWindow(loc) {
+    var codes = Object.keys(railStations);
+    var station = null;
+    for(var i=0; i<codes.length; i++) {
+        var code = codes[i];
+        var st = railStations[code];
+        if(st["loc"] == loc) {
+            station = st;
+            break;
+        }
+    }
+    if(station == null) {
+        console.error("Couldn't find station at", loc);
+        return;
+    }
+    console.log(station);
+
+
+    var div = $("#station-info");
+    $("h2", div).html(station["name"]);
+    div.show();
+
+}
 
 function addStationMarkers() {
     var codes = Object.keys(railStations);
@@ -229,6 +252,11 @@ function addStationMarkers() {
             center: station.loc
         });
         circle.setMap(map);
+        google.maps.event.addListener(circle, 'click', function(ev){
+            console.debug(ev);
+            var loc = this.center;
+            stationWindow(loc);
+        });
         stationCircles[code] = circle;
     }
 }
@@ -284,6 +312,9 @@ initAPIcalls = function() {
         }
         for(var i=0; i<data["stations"].length; i++) {
             var st = data["stations"][i];
+            st["loc"] = new google.maps.LatLng(
+                parseFloat(st["lat"]), parseFloat(st["lon"])
+            );
             railStations[st["station_code"]] = st;
         }
     
@@ -298,15 +329,6 @@ initAPIcalls = function() {
                     location: loc,
                     weight: parseFloat(pt["weight"])
                 });
-
-                if(!railStations.hasOwnProperty(pt.station_code)) {
-                    pt["lines"] = [pt["line"]];
-                    pt["loc"] = loc;
-                    railStations[pt.station_code] = pt;
-                    console.error("no",pt.station_code,"?");
-                } else {
-                    railStations[pt.station_code]["lines"].push(pt["line"]);
-                }
             }
 
             var bus = data["metrobus"];
@@ -346,15 +368,25 @@ boxUpdate = function() {
     startLoad();
 
     setupHeat(rail, bus);
-    if(busStation) {
-        busMarkersVisible = true;
-        addBusStopMarkers();
-    } else {
-        busMarkersVisible = false;
-        hideBusStopMarkers();
-    }
+    setTimeout(function() {
+        if(busStation) {
+            busMarkersVisible = true;
+            addBusStopMarkers();
+        } else {
+            busMarkersVisible = false;
+            hideBusStopMarkers();
+        }
 
-    endLoad();
+        if(rail) {
+            railMarkersVisible = true;
+            addStationMarkers();
+        } else {
+            railMarkersVisible = false;
+            hideStationMarkers();
+        }
+
+        endLoad();
+    }, 100);
 }
 
         </script>
@@ -362,9 +394,55 @@ boxUpdate = function() {
 
     <body>
         <div id="loading">
-            <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+            <center>
+            <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66">
                <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
-            </svg>
+            </svg><br /><br />
+            One moment please..
+            </center>
+        </div>
+        <div id="station-info">
+            <div class="close">
+                <i class="fa fa-times fa-sm"></i>
+            </div>
+            <div class="left-info">
+                <h2>Title</h2>
+                <h3><span class="line"></span></h3>
+            </div>
+            <div class="right-info">
+                <style>
+                .destination-table thead tr {
+                    font-size: 18px;
+                    color: rgba(48, 48, 48, 0.4);
+                    text-align: center;
+                    text-transform: lowercase;
+                    font-variant: small-caps
+                }
+
+                .line {
+                    display: inline-block;
+                    width: 48px;
+                    height: 24px;
+                    font-size: 15px;
+                    text-align: center;
+                    margin-left: auto;
+                }
+                </style>
+                <table class="destination-table">
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Cars</th>
+                            <th>Destination</th>
+                            <th>Mins</th>
+                            <th>Arrival</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
         <div id="panel">
             <input type="checkbox" id="rail-box" onchange="boxUpdate()" checked />Metrorail<br />

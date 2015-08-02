@@ -1,0 +1,88 @@
+html, body, #map-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+
+    font-family: 'Roboto','Helvetica','Open Sans','sans-serif';
+}
+
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin: calc(147px / -2) calc(191px / -2);
+    z-index: 10;
+    background: rgba(242, 242, 242, 0.8);
+    padding: 20px;
+    width: 191px;
+    height: 117px;
+}
+
+#panel {
+    display: none;
+    position: absolute;
+    top: 25px;
+    right: 0;
+    width: auto;
+    padding: 5px 10px;
+    z-index: 10;
+    line-height: 20px;
+
+    background: rgba(242, 242, 242, 0.8);
+}
+
+#station-info {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100px;
+    width: calc(100% - 75px - 160px);
+    background: rgba(242, 242, 242, 0.8);
+    z-index: 10;
+}
+
+#station-info .close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+#station-info .left-info {
+    float: left;
+    padding-left: 20px;
+}
+
+#section-info .right-info {
+    float: right;
+    margin-right: 20px;
+}
+
+.line.rd {
+    color: #BF1237;
+}
+
+.line.bl {
+    color: #0993D5;
+}
+
+.line.gr {
+    color: #00AF51;
+}
+
+.line.or {
+    color: DD8602;
+}
+
+.line.sv {
+    color: #A0A2A0;
+}
+
+.line.yl {
+    color: #F6D316;
+}

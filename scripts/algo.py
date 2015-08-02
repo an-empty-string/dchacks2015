@@ -17,7 +17,7 @@ for line in wmata.lines.all:
         data["metrorail"].append({
             "lat": staa.location.lat,
             "lon": staa.location.lon,
-            "weight": 5/headway,
+            "weight": 8/headway,
             "line": line,
             "name": staa.name,
             "station_code": staa.station_code

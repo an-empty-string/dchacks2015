@@ -126,18 +126,23 @@ var busStops = {};
 
 var map, pointarray, heatmap;
 
+
 function init() {
     console.debug("init map");
     var mapOptions = {
         zoom: 10,
         center: new google.maps.LatLng(38.904815, -77.016190),
         mapTypeId: google.maps.MapTypeId.MAP,
-        maxZoom: 10
+        maxZoom: 10,
+        styles: [{
+            stylers: [{
+                saturation: -100
+            }]
+        }]
     };
 
     map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
-
     var pointArray = new google.maps.MVCArray(latData);
     heatmap = new google.maps.visualization.HeatmapLayer({
         data: pointArray,

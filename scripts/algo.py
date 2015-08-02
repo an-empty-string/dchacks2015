@@ -41,8 +41,8 @@ class DistanceCalculations:
         print("lat length "  + str(len(self.latlist)))
         print("lon length "  + str(len(self.lonlist)))
         print(len(self.latlist) * len(self.lonlist))
-        input("Do this many points across 5 processors? (ctrl-C if u r scared) ")
-        pool = Pool(5)
+        input("Do this many points across 9 processors? (ctrl-C if u r scared) ")
+        pool = Pool(9)
         single_lat_dict_list = pool.map(self.singlelat, self.latlist)
         return dict(zip(self.latlist, single_lat_dict_list))
     
@@ -63,7 +63,7 @@ def samplerunbeltway():
     min_lat = -77.204129
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
-    distance_calc_obj.point_map()
+    return distance_calc_obj.point_map()
     print("Done")
 
 def sampleruninnercity():
@@ -73,7 +73,7 @@ def sampleruninnercity():
     min_lat = -77.982933
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
-    distance_calc_obj.point_map()
+    return distance_calc_obj.point_map()
     print("Done")
 
 def sampleruntiny():
@@ -83,7 +83,7 @@ def sampleruntiny():
     min_lat = -77.051867
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
-    distance_calc_obj.point_map()
+    return distance_calc_obj.point_map()
     print("Done")
 
 def samplerunfullcity():
@@ -93,8 +93,18 @@ def samplerunfullcity():
     min_lat = -77.314407
     resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
-    distance_calc_obj.point_map()
+    return distance_calc_obj.point_map()
     print("Done")
     
 if __name__ == '__main__':
-    samplerunfullcity()
+    data = sampleruninnercity()
+    csvdata = []
+    for lat in data:
+        for lon in data[lat]:
+            csvdata.append((lat, lon, data[lat][lon]))
+        
+    stringydata = "\n".join([",".join(list(map(str, i))) for i in csvdata])
+    with open("data.csv", "w") as f:
+        f.write(stringydata)
+
+    print("Done")

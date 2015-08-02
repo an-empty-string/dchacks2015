@@ -94,7 +94,7 @@ MercatorProjection.prototype.fromPointToLatLng = function (point) {
 
 
 var desiredRadiusPerPointInMeters = 700;
-function getNewRadius(map) {
+function getNewRadius() {
     console.log("Radius calc")
     var numTiles = 1 << map.getZoom();
     var center = map.getCenter();
@@ -129,8 +129,7 @@ var busCircles = {};
 
 
 var map;
-var railHeat;
-var busHeat;
+var heatMap;
 
 
 function init() {
@@ -151,20 +150,13 @@ function init() {
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 
-    var railPoints = new google.maps.MVCArray(railLat);
-    railHeat = new google.maps.visualization.HeatmapLayer({
-        data: railPoints,
-        radius: getNewRadius(map)
+    latData = busLat.concat(railLat);
+    var pointList = new google.maps.MVCArray(latData);
+    heatMap = new google.maps.visualization.HeatmapLayer({
+        data: pointList,
+        radius: getNewRadius()
     });
-    railHeat.setMap(map);
 
-
-    var busPoints = new google.maps.MVCArray(busLat);
-    busHeat = new google.maps.visualization.HeatmapLayer({
-        data: busPoints,
-        radius: getNewRadius(map)
-    });
-    busHeat.setMap(map);
 
     var gradient = [
         'rgba(103, 147, 237, 0)',
@@ -182,11 +174,14 @@ function init() {
         'rgba(224, 12, 229, 1)',
         'rgba(235, 0, 229, 1)'
     ]
-    railHeat.set('gradient', railHeat.get('gradient') ? null : gradient);
+    heatMap.set('gradient', heatMap.get('gradient') ? null : gradient);
 
 
-    google.maps.event.addListener(map, 'zoom_changed', function () {
-        map.setOptions({radius:getNewRadius(map)});
+
+
+    google.maps.event.addListener(map, 'zoom_changed', function (){
+        // heatMap, not map
+        heatMap.setOptions({radius:getNewRadius()});
     });
 
 
@@ -198,6 +193,9 @@ function init() {
     ]
     heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
     */
+
+
+    heatMap.setMap(map);
 
     addStationMarkers();
 

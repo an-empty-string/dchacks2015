@@ -19,3 +19,4 @@ class HistoricalTrainPosition(BaseModel):
     dest_station = CharField()
     time = IntegerField()
     timestamp = DateTimeField()
+    trackgroup = IntegerField()

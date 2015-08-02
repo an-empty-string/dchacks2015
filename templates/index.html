@@ -150,7 +150,29 @@ function init() {
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 
-    latData = busLat.concat(railLat);
+    setupHeat(true, true);
+
+    addStationMarkers();
+}
+
+function setupHeat(rail, bus) {
+
+    if(heatMap) {
+        heatMap.setMap(null);
+        heatMap = null;
+    }
+
+    if(rail && bus) {
+        latData = busLat.concat(railLat);
+    } else if(rail) {
+        latData = railLat;
+    } else if(bus) {
+        latData = busLat;
+    } else {
+        latData = [];
+    }
+
+
     var pointList = new google.maps.MVCArray(latData);
     heatMap = new google.maps.visualization.HeatmapLayer({
         data: pointList,
@@ -196,13 +218,11 @@ function init() {
 
 
     heatMap.setMap(map);
-
-    addStationMarkers();
-
-
 }
 
-var stationMarkersVisible = true;
+var railVisible = true;
+var railMarkersVisible = true;
+var busVisible = false;
 var busMarkersVisible = false;
 
 function addStationMarkers() {
@@ -300,26 +320,21 @@ google.maps.event.addDomListener(window, 'load', function() {
     
 });
 
-busesToggle = function() {
-    if(!busMarkersVisible) {
-        addBusStopMarkers();
-        $("#buses-toggle").innerHTML = "Hide Buses";
-    } else {
-        hideBusStopMarkers();
-        $("buses-toggle").innerHTML = "Show Buses";
-    }
-    busMarkersVisible = !busMarkersVisible;
-}
 
-trainsToggle = function() {
-    if(!stationMarkersVisible) {
-        addStationMarkers();
-        $("#trains-toggle").innerHTML = "Hide Trains";
+
+boxUpdate = function() {
+    var rail = $("#rail-box").checked;
+    var bus = $("#bus-box").checked;
+    var busStation = $("#bus-station-box").checked;
+
+    setupHeat(rail, bus);
+    if(busStation) {
+        busMarkersVisible = true;
+        addBusStopMarkers();
     } else {
-        hideStationMarkers();
-        $("#trains-toggle").innerHTML = "Show Trains";
+        busMarkersVisible = false;
+        hideBusStopMarkers();
     }
-    stationMarkersVisible = !stationMarkersVisible;
 }
 
         </script>
@@ -327,8 +342,10 @@ trainsToggle = function() {
 
     <body>
         <div id="panel">
-            <button onclick="busesToggle()" id="buses-toggle">Show Buses</button> 
-            <button onclick="trainsToggle()" id="trains-toggle">Hide Trains</button>
+            <input type="checkbox" id="rail-box" onchange="boxUpdate()" checked />Metrorail<br />
+            <input type="checkbox" id="bus-box" onchange="boxUpdate()" />Metrobus<br />
+            &nbsp; &nbsp; <input type="checkbox" id="bus-station-box" onchange="boxUpdate()" />Show stations
+
         </div>
         <div id="map-canvas"></div>
     </body>

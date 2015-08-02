@@ -17,7 +17,8 @@ for line in wmata.lines.all:
         data["metrorail"].append({
             "lat": staa.location.lat,
             "lon": staa.location.lon,
-            "weight": 8/headway,
+            "headway": headway,
+            "weight": 10/headway,
             "line": line,
             "name": staa.name,
             "station_code": staa.station_code
@@ -29,7 +30,7 @@ for stop in bus_stops:
     data["metrobus"].append({
         "lat": float(stop["Lat"]),
         "lon": float(stop["Lon"]),
-        "weight": len(stop["Routes"])/10,
+        "weight": len(stop["Routes"])/20,
         "routes": stop["Routes"],
         "name": stop["Name"],
         "stop_id": stop["StopID"]

@@ -9,6 +9,9 @@ import os.path
 pos = list(HistoricalTrainPosition.select())
 updates = 0
 
+trackgroup1 = []
+trackgroup2 = []
+
 for tr in pos:
 
     trackgroup = tr.trackgroup
@@ -20,15 +23,17 @@ for tr in pos:
        RIGHT side of Metro map = 1 (incl Greenbelt)
     """
                         #ShGrv, Wihle, Vnna, FrncSp, Hntgn, BchAv 
-    if dest_station in ['A15', 'N06', 'K08', 'J03', 'C15', 'F11']:
+    if tr.dest_station in ['A15', 'N06', 'K08', 'J03', 'C15', 'F11']:
         trackgroup2.append(tr.id)
-                          #Glnmt, Grnblt, NCrl, Lrgo, Grnbt, MtVrn, FtTtn, FtTtn
-    elif dest_station in ['B11', 'E10', 'D13', 'G05', 'F11', 'E01', 'B06', 'E06']:
+                          #Glnmt, Grnblt, NCrl, Lrgo, MtVrn, FtTtn, FtTtn
+    elif tr.dest_station in ['B11', 'E10', 'D13', 'G05', 'E01', 'B06', 'E06']:
         trackgroup1.append(tr.id)
 
     if trackgroup is None:
         continue
     updates += 1
 
+HistoricalTrainPosition.update(trackgroup=1).where(HistoricalTrainPosition.id << trackgroup1).execute()
+HistoricalTrainPosition.update(trackgroup=2).where(HistoricalTrainPosition.id << trackgroup2).execute()
 
 print(updates, "updates")

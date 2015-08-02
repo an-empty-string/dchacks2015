@@ -136,6 +136,11 @@ html, body, #map-canvas {
     color: black;
 }
 
+.line.grey {
+    background-color: grey;
+    color: white;
+}
+
 
 .destination-table {
     width: 100%;

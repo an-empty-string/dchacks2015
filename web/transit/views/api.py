@@ -122,3 +122,22 @@ def get_train_positions():
                          far=_station_fmt(wmata.stations[i.station_far]),
                          fraction=i.fraction))
     return jsonify(data=data)
+
+
+def _bus_stop_fmt(stop):
+    res = wmata.rail_system.api.get_json("https://api.wmata.com/NextBusService.svc/json/jPredictions?StopID={}".format(stop))
+    res = res["Predictions"]
+    data = []
+    for route in res:
+        data.append({
+            "directionNum": route["DirectionNum"],
+            "direction": route["DirectionText"],
+            "time": route["Minutes"],
+            "vehicleID": route["VehicleID"],
+            "routeID": route["RouteID"],
+            "tripID": route["TripID"]
+        })
+    return data
+
+def get_bus_stop_info(stop):
+    return jsonify(stop=_bus_stop_fmt(stop))

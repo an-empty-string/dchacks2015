@@ -420,6 +420,11 @@ function addBusStopMarkers() {
             center: stop.loc
         });
         circle.setMap(map);
+        google.maps.event.addListener(circle, 'click', function(ev) {
+            console.debug(ev);
+            var loc = this.center;
+            busWindow(findBus(loc));
+        })
         busCircles[id] = circle;
     }
 }
@@ -509,6 +514,9 @@ boxUpdate = function() {
         if(busStations) {
             busMarkersVisible = true;
             addBusStopMarkers();
+            setTimeout(function() {
+                endLoad();
+            }, 7000);
         } else {
             busMarkersVisible = false;
             hideBusStopMarkers();
@@ -522,7 +530,7 @@ boxUpdate = function() {
             hideStationMarkers();
         }
 
-        endLoad();
+        if(!busStations) endLoad();
     }, 100);
 }
 
@@ -623,6 +631,7 @@ closeSearch = function() {
     $("#search-box").val("");
     $("#search-close").hide();
 }
+
 var search_markers = [];
 searchJump = function() {
     var q = $("#search-box").val();

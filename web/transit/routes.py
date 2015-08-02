@@ -12,6 +12,7 @@ routes = (
     ('/api/lines/full/', api.get_lines_full),
     ('/api/trainpos/', api.get_train_positions),
     ('/api/grab/', api.client_grab),
+    ('/api/bus/stop/<stop>/', api.get_bus_stop_info),
     ('/', main.index)
 )
 

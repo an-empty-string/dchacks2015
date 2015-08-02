@@ -2,10 +2,12 @@ __author__ = 'claudia'
 from config import wmata
 import csv
 csvdata = []
-with open('stops.csv', 'rb') as csvfile:
+with open('stops.csv', 'r') as csvfile:
     reader = csv.reader(csvfile)
-    for x in reader:
-        csvdata.append(float(x[5]),float(x[6]),1/30)
+    rlist = list(reader)
+    rlist.pop(0)
+    for x in rlist:
+        csvdata.append([float(x[5]),float(x[6]),1/30])
 for s in wmata.lines.all:
     for staa in wmata.lines[s].stations:
         if s == 'RD':

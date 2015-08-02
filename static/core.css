@@ -246,3 +246,11 @@ html, body, #map-canvas {
     font-weight: 100;
     text-align: center;
 }
+
+.score-container {
+    font-size: 14px;
+}
+
+#score {
+    
+}

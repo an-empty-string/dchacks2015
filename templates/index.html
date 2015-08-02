@@ -349,7 +349,8 @@ function stationWindow(station) {
 
     var div = $("#station-info");
     div.addClass("rail").removeClass("bus");
-    $(".title", div).html("<i class='fa fa-train'></i> " + station["name"]);
+    $(".title", div).html("<i class='fa fa-train'></i> " + station["name"] + "<div class='score-container'>" +
+                        "Availability Score: "+(parseInt(station.weight * 10))+"</div>");
 
     var line_html = "<span>" + station.lines.length +" line" + (station.lines.length == 1 ? '' : 's') + ":</span><br />";
     for(var i=0; i<station.lines.length; i++) {
@@ -362,6 +363,8 @@ function stationWindow(station) {
     $("thead > tr", div).html("<th>Line</th><th>Cars</th><th>Destination</th><th>Mins</th><th>Arrival</th>");
 
     $("tbody", div).html("<tr><td></td><td></td><td>"+LOADING_SPINNER+"</td></tr>");
+
+    $(".score", div).html(station.weight * 100);
 
     map.setZoom(14);
     map.panTo(station.loc);
@@ -436,7 +439,8 @@ function busWindow(stop) {
 
     var div = $("#station-info");
     div.addClass("bus").removeClass("rail");
-    $(".title", div).html("<i class='fa fa-bus'></i> " + stop["name"]);
+    $(".title", div).html("<i class='fa fa-bus'></i> " + stop["name"] + "<div class='score-container'>" +
+                        "Availability Score: "+(parseInt(stop.weight * 100))+"</div>");
 
     var line_html = "<span>" + stop.routes.length +" route" + (stop.routes.length == 1 ? '' : 's') + ":</span><br />";
     for(var i=0; i<stop.routes.length; i++) {
@@ -591,6 +595,9 @@ initAPIcalls = function() {
                     location: loc,
                     weight: parseFloat(pt["weight"])
                 });
+                if(pt["station_code"] in railStations) {
+                    railStations[pt["station_code"]]["weight"] = pt["weight"];
+                }
             }
 
             var bus = data["metrobus"];
@@ -819,7 +826,12 @@ searchJump = function() {
                 <i class="fa fa-times fa-sm"></i>
             </div>
             <div class="left-info">
-                <div class="title">Title</div>
+                <div class="title">Title
+
+                    <div class="score-container">
+                        Access Score: <span id="score"></span>
+                    </div>
+                </div>
                 <div class="lines">
                     <span class="line"></span>
                 </div>

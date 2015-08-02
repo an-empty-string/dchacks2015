@@ -1,3 +1,7 @@
+body {
+    background-image: url(/static/pw_pattern.png);
+}
+
 html, body, #map-canvas {
     position: absolute;
     top: 0;

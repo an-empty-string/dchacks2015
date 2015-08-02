@@ -30,7 +30,7 @@ for stop in bus_stops:
     data["metrobus"].append({
         "lat": float(stop["Lat"]),
         "lon": float(stop["Lon"]),
-        "weight": len(stop["Routes"])/20,
+        "weight": len(stop["Routes"])/8,
         "routes": stop["Routes"],
         "name": stop["Name"],
         "stop_id": stop["StopID"]

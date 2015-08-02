@@ -327,7 +327,9 @@ class MetrorailSystem:
 
     def _build_graph(self):
         if self._graph:
+            print("using cached graph")
             return self._graph
+        print("building graph from scratch")
         stations = self.api.stations.all.values()
         graph = {}
         for station in stations:

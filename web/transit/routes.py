@@ -9,7 +9,9 @@ routes = (
     ('/api/station/<code>/', api.get_station_by_code),
     ('/api/stations/', api.get_stations),
     ('/api/lines/', api.get_lines),
+    ('/api/lines/full/', api.get_lines_full),
     ('/api/trainpos/', api.get_train_positions),
+    ('/api/grab/', api.client_grab),
     ('/', main.index)
 )
 

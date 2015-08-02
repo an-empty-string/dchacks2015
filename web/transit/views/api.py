@@ -30,6 +30,14 @@ def _line_fmt_complete(line):
         "stations": [k.station_code for k in line.stations]
     }
 
+def _line_fmt_stations(line):
+    return {
+        "friendly_name": line.friendly_name,
+        "line_code": line.line_code,
+        "stations": [_station_fmt_complete(wmata.stations[k.station_code]) for k in line.stations]
+    }
+
+
 def get_all_trains():
     print("Loading all predictions")
     predictions = wmata.rail_system.predictions()
@@ -94,7 +102,17 @@ def get_stations():
     return jsonify(stations=[_station_fmt_complete(i) for i in wmata.stations.all.values()])
 
 def get_lines():
-    return jsonify(lines=[_line(i) for i in wmata.lines.all.values()])
+    return jsonify(lines=[_line_fmt_complete(i) for i in wmata.lines.all.values()])
+
+def get_lines_full():
+    return jsonify(lines=[_line_fmt_stations(i) for i in wmata.lines.all.values()])
+
+def client_grab():
+    return jsonify(
+        lines=[_line_fmt_stations(i) for i in wmata.lines.all.values()],
+        stations=[_station_fmt_complete(i) for i in wmata.stations.all.values()]
+    )
+
 
 def get_train_positions():
     trains = list(CurrentTrainPosition.select())

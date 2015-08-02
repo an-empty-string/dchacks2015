@@ -62,7 +62,7 @@ with launch_ipdb_on_exception():
             continue
         station_near = stations[[i[0] for i in stations].index(station_far) - 1][0]
         fraction = 1 - ((times[train.direction_dest][station_far] - time) / times[station_near][station_far])
-        ds.append(dict(fraction=fraction, station_near=station_near.station_code, station_far=station_far.station_code))
+        ds.append(dict(fraction=fraction, station_near=station_near.station_code, station_far=station_far.station_code, line=train.line.friendly_name, dest=train.destination.name, time_to_far=train.time_int))
         print("{}% between {} and {}".format(round(fraction * 100, 1), station_near, station_far))
 
     with db.atomic():

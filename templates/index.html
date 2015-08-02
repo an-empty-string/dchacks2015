@@ -741,16 +741,16 @@ searchInit = function() {
             var results = $("#search-results > .result:not(.jump)");
             if(results.length == 1) {
                 results.eq(0).click();
-                clearSearch();
+                closeSearch();
             } else if(results.length == 0) {
                 $("#search-results > .result.jump").eq(0).click();
-                clearSearch();
+                closeSearch();
             } else console.info("There is more than one item to possibly select!");
         }
     }).on("blur", function() {
         var val = $(this).val();
         if(val.length < 1 || val == null) {
-            clearSearch();
+            closeSearch();
         }
     });
     q.focus();

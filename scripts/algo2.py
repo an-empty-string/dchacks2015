@@ -21,4 +21,6 @@ for s in wmata.lines.all:
 stringydata = "\n".join([",".join(list(map(str, i))) for i in csvdata])
 with open("gen/data2.csv", "w") as f:
     f.write(stringydata)
+with open("data2.csv", "w") as f:
+    f.write(stringydata)
 print("Done")

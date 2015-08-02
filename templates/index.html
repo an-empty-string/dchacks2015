@@ -137,6 +137,7 @@ function init() {
     setupHeat(true, true);
     drawLines();
     fixInfoWindow();
+    getTrainLocations();
 }
 
 function fixInfoWindow() {
@@ -180,6 +181,25 @@ function drawLines(){
 }
 
 function getTrainLocations() {
+    $.getJSON('/api/stations/', function(data) {
+        var stations = {};
+        data.stations.forEach(function(s) { stations[s.station_code] = s; })
+        $.getJSON('/api/trainpos/', function(data) {
+            data.data.forEach(function(tr) {
+                var near = stations[tr.near.station_code];
+                var far = stations[tr.far.station_code];
+                var latnear = near.lat, latfar = far.lat, lonnear = near.lon, lonfar = far.lon;
+                var dla = (far.lat - near.lat), dlo = (far.lon - near.lon);
+                var lat = (dla * tr.fraction) + latnear, lon = (dlo * tr.fraction) + lonnear;
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(lat, lon),
+                    map: map,
+                    title: 'Train',
+                    icon: '/static/train.png'
+                });
+            });
+        });
+    });
 }
 
 function setupHeat(rail, bus) {

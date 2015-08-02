@@ -133,12 +133,12 @@ class MetrorailStation:
         else:
             data = list(HistoricalTrainPosition.select().where(HistoricalTrainPosition.timestamp == self.api.timestamp, HistoricalTrainPosition.next_station << station_codes))
             return [MetrorailTrainPrediction(
-                self.api.lines[i.line_code],
-                self.api.stations[i.dest_station],
+                self.api.lines[prediction.line_code],
+                self.api.stations[prediction.dest_station],
                 self,
-                prediction.time,
-                prediction.cars
-            ) for i in data]
+                str(prediction.time),
+                str(prediction.cars)
+            ) for prediction in data]
 
     def _lines(self):
         return {self.api.lines[code] for code in self._line_codes}
@@ -422,13 +422,13 @@ class MetrorailSystem:
         else:
             data = list(HistoricalTrainPosition.select().where(HistoricalTrainPosition.timestamp == self.api.timestamp))
             predictions = [MetrorailTrainPrediction(
-                self.api.lines[i.line_code],
+                self.api.lines[prediction.line_code],
                 self.api.stations[prediction.dest_station],
                 self.api.stations[prediction.next_station],
-                prediction.time,
-                prediction.cars
-            ) for i in data]
-            return dict((p.next_station, p) for i in predictions)
+                str(prediction.time),
+                str(prediction.cars)
+            ) for prediction in data]
+            return dict((p.station, p) for p in predictions)
 
 class MetroApi:
     def __init__(self, api_key, timestamp=None, redis_info={}):

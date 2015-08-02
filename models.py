@@ -1,5 +1,12 @@
 from peewee import *
-from config import db
+import json
+
+with open("config.json") as f:
+    config = json.load(f)
+
+db = PostgresqlDatabase(config["POSTGRES_USER"], host=config["POSTGRES_HOST"],
+        user=config["POSTGRES_USER"],
+        password=config["POSTGRES_PASSWORD"])
 
 class BaseModel(Model):
     class Meta:

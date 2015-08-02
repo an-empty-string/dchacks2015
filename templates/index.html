@@ -132,7 +132,7 @@ function init() {
 
 
     setupHeat(true, true);
-
+    drawLines();
     fixInfoWindow();
 }
 
@@ -153,6 +153,25 @@ function fixInfoWindow() {
 
         set.apply(this, arguments);
     }
+}
+
+function drawLines(){
+    $.getJSON('/api/lines/', function(data) {
+        data.lines.forEach(function(line) {
+            var points = [];
+            line.stations.forEach(function(station) {
+                points.push(new google.maps.LatLng(station.lat, station.lon));
+            });
+            var pl = new google.maps.Polyline({
+                path: points,
+                geodesic: false,
+                strokeColor: line.friendly_name,
+                strokeWeight: 3
+            });
+            pl.setMap(map);
+        });
+    });
+    
 }
 
 function setupHeat(rail, bus) {

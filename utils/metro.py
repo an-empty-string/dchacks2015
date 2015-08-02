@@ -77,7 +77,7 @@ class MetrorailTrainPrediction:
     def _car_format(self, car):
         if car == "2":
             return 8
-        if car == "-":
+        if "-" in car:
             return 6
         return int(car)
 
@@ -237,7 +237,6 @@ class MetrorailLine:
     @property
     def destinations(self):
         return [self.api.stations[code] for code in self.destination_codes] 
-    
 
     def _get_path(self):
         return [i["StationCode"] for i in self.api.get_json(build_url(Service.rail, "jPath"),
@@ -406,8 +405,9 @@ class MetrorailSystem:
         return result
 
 class MetroApi:
-    def __init__(self, api_key, redis_info={}):
+    def __init__(self, api_key, timestamp=None, redis_info={}):
         self.api_key = api_key
+        self.timestamp = timestamp
         if redis_info != {}:
             self.cache = redis.StrictRedis(**redis_info)
         else:

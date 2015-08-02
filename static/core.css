@@ -43,14 +43,19 @@ html, body, #map-canvas {
     top: 0;
     left: 75px;
     width: calc(100% - 75px - 160px);
-    background: rgba(242, 242, 242, 0.8);
+    min-height: 120px;
+    background: rgba(242, 242, 242, 0.9);
     z-index: 10;
 }
 
 #station-info .close {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    cursor: pointer;
 }
 
 #station-info .left-info {
@@ -121,6 +126,7 @@ html, body, #map-canvas {
 
 .destination-table {
     width: 100%;
+    text-align: center;
 }
 
 .destination-table thead tr {
@@ -129,4 +135,27 @@ html, body, #map-canvas {
     text-align: center;
     text-transform: lowercase;
     font-variant: small-caps
+}
+
+.destination-table .line-row {
+    width: 10%;
+}
+
+.destination-table .car-row {
+    width: 10%;
+}
+
+.destination-table .dest-row {
+    width: 40%;
+    overflow-x: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.destination-table .time-row {
+    width: 10%;
+}
+
+.destination-table .arr-row {
+    width: 30%;
 }

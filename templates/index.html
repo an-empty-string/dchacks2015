@@ -262,7 +262,7 @@ function stationWindow(station) {
 
 
     var div = $("#station-info");
-    $(".title", div).html(station["name"]);
+    $(".title", div).html("<i class='fa fa-train'></i> " + station["name"]);
 
     var line_html = "<span>" + station.lines.length +" line" + (station.lines.length == 1 ? '' : 's') + ":</span><br />";
     for(var i=0; i<station.lines.length; i++) {
@@ -480,28 +480,58 @@ searchInit = function() {
         var val = $(this).val();
         doSearch(val);
     });
+    q.focus();
 }
 
 doSearch = function(q) {
     var r = $("#search-results");
-    var codes = Object.keys(railStations);
-    var res = [];
-    for(var i=0; i<codes.length; i++) {
-        var cd = codes[i];
-        var st = railStations[cd];
-        if(st.name.toLowerCase().indexOf(q.toLowerCase()) != -1) {
-            res.push(st);
+
+    var res_html = "";
+    if(railMarkersVisible) {
+        var codes = Object.keys(railStations);
+        var res = [];
+        var seen_names = [];
+        for(var i=0; i<codes.length; i++) {
+            var cd = codes[i];
+            var st = railStations[cd];
+            if(seen_names.indexOf(st.name) != -1) {
+                continue;
+            }
+            seen_names.push(st.name);
+            if(st.name.toLowerCase().indexOf(q.toLowerCase()) != -1) {
+                res.push(st);
+            } else if(st.station_code == q) {
+                res.push(st);
+            }
+        }
+
+
+        for(var i=0; i<res.length; i++) {
+            var st = res[i];
+            res_html += "<div class='result' onclick='stationWindow(railStations[\"" + st.station_code + "\"])'>" +
+                        "<i class='fa fa-train fa-xs'></i> Station: " + st.name + " (" + st.lines.join(', ')+")</div>";
         }
     }
 
-    var res_html = "";
+    if(busMarkersVisible) {
+        var ids = Object.keys(busStops);
+        var res = [];
+        for(var i=0; i<ids.length; i++) {
+            var id = ids[i];
+            var r = busStops[id];
+            if(r.stop_id == q) {
+                res.push(r);
+            } else if(r.name.toLowerCase().indexOf(q) != -1) {
+                res.push(r);
+            }
+        }
 
-    for(var i=0; i<res.length; i++) {
-        var st = res[i];
-        res_html += "<div class='result' onclick='stationWindow(railStations[\"" + st.station_code + "\"])'>" +
-                    "Station: " + st.name + "</div>";
+        for(var i=0; i<res.length; i++) {
+            var s = res[i];
+            res_html += "<div class='result' onclick='busWindow(busStations[\"" + s.stop_id + "\"])'>" +
+                        "<i class='fa fa-bus fa-xs'></i> Stop: " + s.name + " (" + s.routes.join(', ') + ")</div>";
+        }
     }
-
     r.html(res_html);
 }
 
@@ -520,7 +550,7 @@ doSearch = function(q) {
 
         <div id="search">
             <div id="search-results"></div>
-            <input type="text" placeholder="Search.." id="search-box" value="" />
+            <input type="text" placeholder="Search for a station or location..." id="search-box" value="" />
         </div>
 
         <div id="station-info">

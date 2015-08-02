@@ -111,6 +111,7 @@ var busCircles = {};
 var map;
 var heatMap;
 
+firstLoad = true;
 
 function init() {
     console.debug("init map");
@@ -220,12 +221,18 @@ function setupHeat(rail, bus) {
 
 function pageLoadedHooks() {
     $("#panel").show();
-    if(location.hash.indexOf('#station=') != -1) {
-        var code = location.hash.split('#station=')[1];
-        if(code in railStations) {
-            stationWindow(railStations[code]);
+    if(firstLoad) {
+        if(location.hash.indexOf('#station=') != -1) {
+            var code = location.hash.split('#station=')[1];
+            if(code in railStations) {
+                stationWindow(railStations[code]);
+            }
         }
+
+        searchInit();
     }
+    firstLoad = false;
+
 }
 
 var railVisible = true;
@@ -467,6 +474,37 @@ boxUpdate = function() {
     }, 100);
 }
 
+searchInit = function() {
+    var q = $("#search-box");
+    q.on("keyup", function() {
+        var val = $(this).val();
+        doSearch(val);
+    });
+}
+
+doSearch = function(q) {
+    var r = $("#search-results");
+    var codes = Object.keys(railStations);
+    var res = [];
+    for(var i=0; i<codes.length; i++) {
+        var cd = codes[i];
+        var st = railStations[cd];
+        if(st.name.toLowerCase().indexOf(q.toLowerCase()) != -1) {
+            res.push(st);
+        }
+    }
+
+    var res_html = "";
+
+    for(var i=0; i<res.length; i++) {
+        var st = res[i];
+        res_html += "<div class='result' onclick='stationWindow(railStations[\"" + st.station_code + "\"])'>" +
+                    "Station: " + st.name + "</div>";
+    }
+
+    r.html(res_html);
+}
+
         </script>
     </head>
 
@@ -479,6 +517,12 @@ boxUpdate = function() {
             One moment please..
             </center>
         </div>
+
+        <div id="search">
+            <div id="search-results"></div>
+            <input type="text" placeholder="Search.." id="search-box" value="" />
+        </div>
+
         <div id="station-info">
             <div class="close" onclick="stationWindowClose()">
                 <i class="fa fa-times fa-sm"></i>

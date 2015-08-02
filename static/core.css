@@ -159,3 +159,24 @@ html, body, #map-canvas {
 .destination-table .arr-row {
     width: 30%;
 }
+
+#search {
+    position: absolute;
+    bottom: 3px;
+    left: 3px;
+    width: 300px;
+    z-index: 5;
+    background: rgba(242, 242, 242, 0.5);
+    padding: 5px;
+}
+
+#search-box {
+    width: 100%;
+    height: 100%;
+    font-size: 20px;
+}
+
+#search-results .result {
+    cursor: pointer;
+    line-height: 30px;
+}

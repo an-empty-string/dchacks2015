@@ -55,7 +55,7 @@ html, body, #map-canvas {
     position: absolute;
     top: 0;
     left: 75px;
-    width: calc(100% - 75px - 160px);
+    width: calc(100% - 265px);
     min-height: 200px;
     background: rgba(242, 242, 242, 0.9);
     z-index: 10;
@@ -237,14 +237,12 @@ html, body, #map-canvas {
     background: #f0f0f0;
 }
 
-.loading h1 {
+#loading h1 {
     font-weight: 100;
     margin-top: -20px;
 }
 
-h1.logo {
+#panel h1 {
     font-weight: 100;
-    position: absolute;
-    bottom: 0;
-    center: 0;
+    text-align: center;
 }

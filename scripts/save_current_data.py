@@ -19,8 +19,9 @@ for train in all_trains:
 
     cars = train.cars
     time = train.time_int
+    group = train.group
 
-    HistoricalTrainPosition.create(cars=cars, line_code=line_code, time=time,
+    HistoricalTrainPosition.create(cars=cars, line_code=line_code, time=time, group=group,
                                    next_station=next_station, dest_station=dest_station,
                                    timestamp=ts)
 

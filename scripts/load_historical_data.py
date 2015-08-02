@@ -1,14 +1,16 @@
-from models import HistoricalTrainPosition
+from models import HistoricalTrainPosition, db
 import datetime
 import json
 
 import os
 import os.path
+import sys
 PATH = "/home/fwilson/Downloads/new/metrologging/rail"
 
-print("starting")
+print("ready...")
+datasource = []
 
-filenames = list(os.path.join(PATH, i) for i in os.listdir(PATH))
+filenames = list(os.path.join(PATH, i) for i in os.listdir(PATH))[int(sys.argv[1])::16]
 for filename in filenames:
     data = json.load(open(filename))["Trains"]
     for train in data:
@@ -31,7 +33,14 @@ for filename in filenames:
             time = 1 if train["Min"] == "ARR" else 0
 
         ts = datetime.datetime.fromtimestamp(int(float(filename.split("/")[-1])))
+        ds = dict(cars=cars, line_code=line_code, time=time, next_station=next_station, dest_station=dest_station, timestamp=ts, trackgroup=int(train["Group"]))
+        datasource.append(ds)
 
-        HistoricalTrainPosition.create(cars=cars, line_code=line_code, time=time,
-                                       next_station=next_station, dest_station=dest_station,
-                                       timestamp=ts)
+print("set... ({})".format(len(datasource)))
+print("go! ")
+
+with db.atomic():
+    HistoricalTrainPosition.insert_many(datasource).execute()
+    #HistoricalTrainPosition.create(cars=cars, line_code=line_code, time=time,
+    #                               next_station=next_station, dest_station=dest_station,
+    #                               timestamp=ts, trackgroup=int(train["Group"]))

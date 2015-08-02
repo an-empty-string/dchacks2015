@@ -58,3 +58,6 @@ target/
 
 # App-specific configuration
 /config.json
+
+# Swapfiles
+*.swp

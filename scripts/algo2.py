@@ -18,12 +18,10 @@ for s in wmata.lines.all:
             headway = 12
         else:
             headway = 6
-        csvdata.append((staa.location.lat, staa.location.lon, 5/headway))
+        csvdata.append((staa.location.lat, staa.location.lon, 8/headway))
 
 stringydata = "\n".join([",".join(list(map(str, i))) for i in csvdata])
 print("Converted")
 with open("gen/data2.csv", "w") as f:
-    f.write(stringydata)
-with open("data2.csv", "w") as f:
     f.write(stringydata)
 print("Done")

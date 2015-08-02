@@ -307,7 +307,8 @@ class MetrorailLines:
 class MetrorailSystem:
     def __init__(self, api):
         self.api = api
-        self.graph = self._build_graph()
+        self.graph = property(self._build_graph)
+        self._graph = None
 
     def _adjacent_stations_on_line(self, line, station):
         position = line.stations.index(station)
@@ -325,10 +326,13 @@ class MetrorailSystem:
         return adjacent
 
     def _build_graph(self):
+        if self._graph:
+            return self._graph
         stations = self.api.stations.all.values()
         graph = {}
         for station in stations:
             graph[station] = self._all_adjacent_stations(station)
+        self._graph = graph
         return graph
 
     def _collapse_same_line_stations(self, path):

@@ -26,7 +26,7 @@ def get_all_trains():
             "cars": tr.cars,
             "line": _line_fmt(tr.line),
             "time": tr.time,
-            "time_int": tr.time_in
+            "time_int": tr.time_int
         })
     return jsonify(predictions=output)
 

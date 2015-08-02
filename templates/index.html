@@ -132,7 +132,7 @@ function init() {
 
 
     setupHeat(true, true);
-
+    drawLines();
     fixInfoWindow();
 }
 
@@ -153,6 +153,25 @@ function fixInfoWindow() {
 
         set.apply(this, arguments);
     }
+}
+
+function drawLines(){
+    $.getJSON('/api/lines/', function(data) {
+        data.lines.forEach(function(line) {
+            var points = [];
+            line.stations.forEach(function(station) {
+                points.push(new google.maps.LatLng(station.lat, station.lon));
+            });
+            var pl = new google.maps.Polyline({
+                path: points,
+                geodesic: false,
+                strokeColor: line.friendly_name,
+                strokeWeight: 3
+            });
+            pl.setMap(map);
+        });
+    });
+    
 }
 
 function setupHeat(rail, bus) {
@@ -331,7 +350,7 @@ function addStationMarkers() {
         var station = railStations[code];
         var circle = new google.maps.Circle({
             radius: 50,
-            fillColor: "rgba(153,51,146,1)",
+            fillColor: "rgba(256,256,256,1)",
             fillOpacity: 1.0,
             strokeOpacity: 0,
             center: station.loc
@@ -363,7 +382,7 @@ function addBusStopMarkers() {
         var stop = busStops[id];
         var circle = new google.maps.Circle({
             radius: 25,
-            fillColor: "rgba(56,68,143,1)",
+            fillColor: "rgba(0,0,0,1)",
             fillOpacity: 1.0,
             strokeOpacity: 0,
             center: stop.loc

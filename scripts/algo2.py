@@ -2,7 +2,6 @@ __author__ = 'claudia'
 from config import wmata
 import json
 csvdata = []
-
 bus_stops = json.loads(open("bus-stops.json", "r").read())
 bus_stops = bus_stops["Stops"]
 for stop in bus_stops:

@@ -12,9 +12,13 @@ class DistanceCalculations:
     def __init__(self, lat1, lat2, lon1, lon2, res):
         self.lat1, self.lat2 = lat1, lat2
         self.lon1, self.lon2 = lon1, lon2
+        self.res = res
+        print(self.lat1, self.lat2, self.lon1, self.lon2, self.res)
         self.latlist = list(f_range(self.lat1, self.lat2, self.res))
         self.lonlist = list(f_range(self.lon1, self.lon2, self.res))
-        self.res = res
+        print(self.lonlist)
+        print(self.latlist)
+
 
     def find_dist(self, stat, lata, longa):
         dx = stat.location.lon - longa
@@ -36,14 +40,16 @@ class DistanceCalculations:
     
     
     def point_map(self):
+        print("lat length "  + str(len(self.latlist)))
+        print("lon length "  + str(len(self.lonlist)))
         print(len(self.latlist) * len(self.lonlist))
         input("Do this many points across 5 processors? (ctrl-C if u r scared) ")
         pool = Pool(5)
-        single_lat_dict_list = pool.map(self.singlelat, latlist)
+        single_lat_dict_list = pool.map(self.singlelat, self.latlist)
         return dict(zip(self.latlist, single_lat_dict_list))
     
     def singlelat(self, lat):
-        return {lon: point_calc(lat, lon) for lon in self.lonlist}
+        return {lon: self.point_calc(lat, lon) for lon in self.lonlist}
     
     
 def calc_trainfreq(m):
@@ -54,7 +60,7 @@ def samplerunfullcity():
     min_lon = 38.755377
     max_lat = -76.829635
     min_lat = -77.314407
-    resi = .01
+    resi = .001
     distance_calc_obj = DistanceCalculations(min_lat, max_lat, min_lon, max_lon, resi)
     distance_calc_obj.point_map()
     print("Done")

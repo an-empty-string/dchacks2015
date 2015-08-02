@@ -138,7 +138,33 @@ function init() {
 
     setupHeat(true, true);
     drawLines();
-    fixInfoWindow();}
+    fixInfoWindow();
+}
+
+function scorePointInit() {
+    google.maps.event.addListener(map, 'click', function (e) {
+        var ll = e.latLng;
+        var lat = ll.lat(), lng = ll.lng();
+        var bounds = {
+            Ca: {
+                j: lat-0.05,
+                G: lat+0.05
+            },
+            Ia: {
+                j: lng-0.05,
+                G: lng+0.05
+            }
+        };
+        var inarea = [];
+        for(var i=0; i<stationCircles; i++) {
+            var st = stationCircles[i];
+            if(bounds.contains(st)) {
+                inarea.push(st);
+            }
+        }
+        console.log(inarea)
+    });
+}
 
 function fixInfoWindow() {
     // Here we redefine the set() method.

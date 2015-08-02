@@ -5,6 +5,9 @@
         <title>Metryx - Washington DC</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=1">
     <link rel="stylesheet" type="text/css" href="/static/spinner.css" />
+
+
+    <link rel="stylesheet" href="http://flatlogic.github.io/awesome-bootstrap-checkbox/demo/build.css" />
     
     <link rel="stylesheet" type="text/css" href="/static/core.css" />
     
@@ -249,6 +252,7 @@ function pageLoadedHooks() {
         }
 
         searchInit();
+        checkboxInit();
     }
     firstLoad = false;
 
@@ -465,10 +469,9 @@ endLoad = function() {
 }
 
 boxUpdate = function() {
-    var rail = $("#rail-box")[0].checked;
-    var bus = $("#bus-box")[0].checked;
-    var busStation = $("#bus-station-box")[0].checked;
-
+    var rail = $(".train-icon").attr("data-checked") == "true";
+    var bus = $(".bus-icon").attr("data-checked") == "true";
+    var busStation = $(".bus-station-icon").attr("data-checked") == "true";
     startLoad();
 
     setupHeat(rail, bus);
@@ -491,6 +494,24 @@ boxUpdate = function() {
 
         endLoad();
     }, 100);
+}
+
+checkboxInit = function() {
+    var r = $(".train-icon");
+    r.click(function() {
+        var c = $(this).attr("data-checked");
+        $(this).attr("data-checked", (c == "true"?"false":"true"))
+    });
+    var b = $(".bus-icon");
+    b.click(function() {
+        var c = $(this).attr("data-checked");
+        $(this).attr("data-checked", (c == "true"?"false":"true"))
+    });
+    var bs = $(".bus-station-icon");
+    bs.click(function() {
+        var c = $(this).attr("data-checked");
+        $(this).attr("data-checked", (c == "true"?"false":"true"))
+    });
 }
 
 searchInit = function() {
@@ -601,9 +622,11 @@ doSearch = function(q) {
 
         </div>
         <div id="panel">
-            <input type="checkbox" id="rail-box" onchange="boxUpdate()" checked />Metrorail<br />
-            <input type="checkbox" id="bus-box" onchange="boxUpdate()" />Metrobus<br />
-            &nbsp; &nbsp; <input type="checkbox" id="bus-station-box" onchange="boxUpdate()" />Show stations
+            <span><i class="fa fa-train fa-xs train-icon" data-checked="true"></i> Metrorail Heatmap</span><br />
+
+            <span><i class="fa fa-bullseye fa-xs train-stations-icon" data-checked="false"></i> Metrorail stations</span><br />
+            <span><i class="fa fa-bus fa-xs bus-icon" data-checked="false"></i> Metrobus Heatmap</span><br />
+            <span><i class="fa fa-bullseye fa-xs bus-stations-icon" data-checked="false"></i> Metrobus stations</span>
 
         </div>
         <div id="map-canvas"></div>

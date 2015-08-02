@@ -37,6 +37,18 @@ html, body, #map-canvas {
     background: rgba(242, 242, 242, 0.8);
 }
 
+#panel > span {
+    line-height: 30px;
+}
+
+#panel > span > i {
+    cursor: pointer;
+}
+
+#panel > span > i[data-checked="false"] {
+    opacity: 0.2;
+}
+
 #station-info {
     display: none;
     position: absolute;
@@ -176,7 +188,18 @@ html, body, #map-canvas {
     font-size: 20px;
 }
 
+#search-results {
+    max-height: 510px;
+    overflow-y: auto;
+}
+
 #search-results .result {
     cursor: pointer;
     line-height: 30px;
+}
+
+.train-icon, .bus-icon {
+    position: relative;
+    margin-left: -15px;
+    background: #f0f0f0;
 }

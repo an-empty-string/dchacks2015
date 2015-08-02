@@ -3,14 +3,22 @@
     <head>
         <meta charset="utf-8" />
         <title>Metryx - Washington DC</title>
-        <link rel="stylesheet" type="text/css" href="/static/core.css" />
-        <link rel="stylesheet" type="text/css" href="/static/spinner.css" />
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=1">
+    <link rel="stylesheet" type="text/css" href="/static/spinner.css" />
+    
+    <link rel="stylesheet" type="text/css" href="/static/core.css" />
+    
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,600,300' rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+
+    
 
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=visualization,geometry&amp;sensor=false"></script>
         <script type="text/javascript">
+var LOADING_SPINNER = '<center><svg class="spinner" width="30px" height="30px" viewBox="0 0 66 66"><circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle></svg><br /><br />One moment please..</center>';
+
 var TILE_SIZE = 256;
 
 //Mercator --BEGIN--
@@ -201,13 +209,23 @@ function setupHeat(rail, bus) {
         // loaded fully
         console.debug('tilesloaded')
         endLoad();
-        $("#panel").show();
+        pageLoadedHooks();
     });
 
 
-    //heatMap.setMap(map);
+    heatMap.setMap(map);
 
     addStationMarkers();
+}
+
+function pageLoadedHooks() {
+    $("#panel").show();
+    if(location.hash.indexOf('#station=') != -1) {
+        var code = location.hash.split('#station=')[1];
+        if(code in railStations) {
+            stationWindow(railStations[code]);
+        }
+    }
 }
 
 var railVisible = true;
@@ -215,7 +233,7 @@ var railMarkersVisible = true;
 var busVisible = false;
 var busMarkersVisible = false;
 
-function stationWindow(loc) {
+function findStation(loc) {
     var codes = Object.keys(railStations);
     var station = null;
     for(var i=0; i<codes.length; i++) {
@@ -226,15 +244,18 @@ function stationWindow(loc) {
             break;
         }
     }
-    if(station == null) {
-        console.error("Couldn't find station at", loc);
-        return;
-    }
+    if(!station) console.error("Couldn't find station at "+loc);
+    return station;
+}
+
+function stationWindow(station) {
+    if(station == null) return;
     console.log(station);
+    location.hash = '#station=' + station.station_code;
 
 
     var div = $("#station-info");
-    $("h2", div).html(station["name"]);
+    $(".title", div).html(station["name"]);
 
     var line_html = "";
     for(var i=0; i<station.lines.length; i++) {
@@ -242,8 +263,44 @@ function stationWindow(loc) {
         line_html += "<span class='line " + ln +"'>" + ln + "</span>";
     }
 
-    $("h3", div).html(line_html);
+    $(".lines", div).html(line_html);
+
+    $("tbody", div).html("<tr><td></td><td></td><td>"+LOADING_SPINNER+"</td></tr>");
+
     div.show();
+
+    $.get("/api/trains/station/" + station.station_code, {}, function(d) {
+        var trains = JSON.parse(d);
+        trains = trains["predictions"];
+
+        var trains_html = "";
+
+        for(var i=0; i<trains.length; i++) {
+            var tr = trains[i];
+            var mins = min = tr.time;
+            if(mins == "ARR") mins = "<span class='arr'>ARR</span>";
+            else if(mins == "BRD") mins = "<span class='brd'>BRD</span>";
+            
+            var tm = parseInt(+new Date);
+            if(min != "ARR" && min != "BRD") {
+                tm += 60 * parseInt(min) * 1000;
+            }
+            var time = new Date(tm),
+            h = (time.getHours() > 12 ? time.getHours() - 12 : time.getHours() == 0 ? 12 : time.getHours()),
+            m = time.getMinutes(),
+            timearr = h+":"+(m<10 ? "0"+m : m);
+            console.debug(tm, time, timearr);
+
+            trains_html += "<tr><td class='line-row'>" +
+                            "<span class='line " + tr.line.line_code + "'>" + tr.line.line_code + "</span>" +
+                            "</td><td class='car-row'>" + tr.cars + "</td>" +
+                            "<td class='dest-row'>" + tr.destination.name + "</td>" +
+                            "<td class='time-row'>" + tr.time + "</td>" +
+                            "<td class='arr-row'>" + timearr + "</td></tr>";
+        }
+
+        $("tbody", div).html(trains_html);
+    }, "text");
 
 }
 
@@ -263,7 +320,7 @@ function addStationMarkers() {
         google.maps.event.addListener(circle, 'click', function(ev){
             console.debug(ev);
             var loc = this.center;
-            stationWindow(loc);
+            stationWindow(findStation(loc));
         });
         stationCircles[code] = circle;
     }
@@ -414,28 +471,13 @@ boxUpdate = function() {
                 <i class="fa fa-times fa-sm"></i>
             </div>
             <div class="left-info">
-                <h2>Title</h2>
-                <h3><span class="line"></span></h3>
+                <div class="title">Title</div>
+                <div class="lines">
+                    <span class="line"></span>
+                </div>
             </div>
             <div class="right-info">
-                <style>
-                .destination-table thead tr {
-                    font-size: 18px;
-                    color: rgba(48, 48, 48, 0.4);
-                    text-align: center;
-                    text-transform: lowercase;
-                    font-variant: small-caps
-                }
-
-                .line {
-                    display: inline-block;
-                    width: 48px;
-                    height: 24px;
-                    font-size: 15px;
-                    text-align: center;
-                    margin-left: auto;
-                }
-                </style>
+                
                 <table class="destination-table">
                     <thead>
                         <tr>

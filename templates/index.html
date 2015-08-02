@@ -263,8 +263,6 @@ function setupHeat(rail, bus) {
 
 
     heatMap.setMap(map);
-
-    addStationMarkers();
 }
 
 function pageLoadedHooks() {
@@ -279,6 +277,7 @@ function pageLoadedHooks() {
 
         searchInit();
         checkboxInit();
+        addStationMarkers();
     }
     firstLoad = false;
 
@@ -374,6 +373,7 @@ function stationWindowClose() {
 
 
 function addStationMarkers() {
+    console.info("ADD rail markers");
     var codes = Object.keys(railStations);
     for(var i=0; i<codes.length; i++) {
         var code = codes[i];
@@ -396,6 +396,7 @@ function addStationMarkers() {
 }
 
 function hideStationMarkers() {
+    console.info("HIDE rail markers");
     var keys = Object.keys(stationCircles);
     for(var i=0; i<keys.length; i++) {
         var key = keys[i];
@@ -406,6 +407,7 @@ function hideStationMarkers() {
 }
 
 function addBusStopMarkers() {
+    console.info("ADD bus markers");
     var ids = Object.keys(busStops);
     for(var i=0; i<ids.length; i++) {
         var id = ids[i];
@@ -423,6 +425,7 @@ function addBusStopMarkers() {
 }
 
 function hideBusStopMarkers() {
+    console.info("HIDE bus markers");
     var keys = Object.keys(busCircles);
     for(var i=0; i<keys.length; i++) {
         var key = keys[i];
@@ -496,13 +499,14 @@ endLoad = function() {
 
 boxUpdate = function() {
     var rail = $(".train-icon").attr("data-checked") == "true";
+    var railStations = $(".train-stations-icon").attr("data-checked") == "true";
     var bus = $(".bus-icon").attr("data-checked") == "true";
-    var busStation = $(".bus-station-icon").attr("data-checked") == "true";
+    var busStations = $(".bus-stations-icon").attr("data-checked") == "true";
     startLoad();
 
     setupHeat(rail, bus);
     setTimeout(function() {
-        if(busStation) {
+        if(busStations) {
             busMarkersVisible = true;
             addBusStopMarkers();
         } else {
@@ -510,7 +514,7 @@ boxUpdate = function() {
             hideBusStopMarkers();
         }
 
-        if(rail) {
+        if(railStations) {
             railMarkersVisible = true;
             addStationMarkers();
         } else {
@@ -526,17 +530,26 @@ checkboxInit = function() {
     var r = $(".train-icon");
     r.click(function() {
         var c = $(this).attr("data-checked");
-        $(this).attr("data-checked", (c == "true"?"false":"true"))
+        $(this).attr("data-checked", (c == "true"?"false":"true"));
+        boxUpdate();
+    });
+    var ts = $(".train-stations-icon");
+    ts.click(function() {
+        var c = $(this).attr("data-checked");
+        $(this).attr("data-checked", (c == "true"?"false":"true"));
+        boxUpdate();
     });
     var b = $(".bus-icon");
     b.click(function() {
         var c = $(this).attr("data-checked");
-        $(this).attr("data-checked", (c == "true"?"false":"true"))
+        $(this).attr("data-checked", (c == "true"?"false":"true"));
+        boxUpdate();
     });
-    var bs = $(".bus-station-icon");
+    var bs = $(".bus-stations-icon");
     bs.click(function() {
         var c = $(this).attr("data-checked");
-        $(this).attr("data-checked", (c == "true"?"false":"true"))
+        $(this).attr("data-checked", (c == "true"?"false":"true"));
+        boxUpdate();
     });
 }
 
@@ -683,8 +696,8 @@ searchJump = function() {
         <div id="panel">
             <span><i class="fa fa-train fa-xs train-icon" data-checked="true"></i> Metrorail Heatmap</span><br />
 
-            <span><i class="fa fa-bullseye fa-xs train-stations-icon" data-checked="false"></i> Metrorail stations</span><br />
-            <span><i class="fa fa-bus fa-xs bus-icon" data-checked="false"></i> Metrobus Heatmap</span><br />
+            <span><i class="fa fa-bullseye fa-xs train-stations-icon" data-checked="true"></i> Metrorail stations</span><br />
+            <span><i class="fa fa-bus fa-xs bus-icon" data-checked="true"></i> Metrobus Heatmap</span><br />
             <span><i class="fa fa-bullseye fa-xs bus-stations-icon" data-checked="false"></i> Metrobus stations</span>
 
         </div>

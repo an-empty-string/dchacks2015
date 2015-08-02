@@ -71,17 +71,17 @@ class MetrorailTrainPrediction:
         self.destination = destination
         self.station = station
         self.time = time
-        self.time_int = self.time_format(time)
-        self.cars = self.car_format(car)
+        self.time_int = self._time_format(time)
+        self.cars = self._car_format(car)
 
-    def car_format(self, car):
+    def _car_format(self, car):
         if car == "2":
             return 8
         if car == "-":
             return 6
         return int(car)
 
-    def time_format(self, time):
+    def _time_format(self, time):
         if time == "ARR":
             return 1
         if time == "BRD":

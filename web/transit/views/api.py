@@ -27,7 +27,7 @@ def _line_fmt_complete(line):
     return {
         "friendly_name": line.friendly_name,
         "line_code": line.line_code,
-        "stations": [k.station_code for k in line.stations]
+        "stations": [_station_fmt_complete(k) for k in line.stations]
     }
 
 def _line_fmt_stations(line):

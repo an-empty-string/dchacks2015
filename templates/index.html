@@ -192,12 +192,17 @@ function getTrainLocations() {
                 var latnear = near.lat, latfar = far.lat, lonnear = near.lon, lonfar = far.lon;
                 var dla = (far.lat - near.lat), dlo = (far.lon - near.lon);
                 var lat = (dla * tr.fraction) + latnear, lon = (dlo * tr.fraction) + lonnear;
+                var cstr = "<strong>" + tr.line + "</strong> train towards <strong>" + tr.dest + "</strong><br />Arriving at <strong>" + tr.near.name + "</strong> in <strong>" + tr.ttf + "min</strong>";
+                var iw = new google.maps.InfoWindow({content: cstr, noSuppress: true});
                 var marker = new google.maps.Marker({
                     position: new google.maps.LatLng(lat, lon),
                     map: map,
                     title: 'Train',
                     icon: '/static/train.png'
                 });
+                google.maps.event.addListener(marker, 'click', function() {
+                    iw.open(map, marker);
+                })
             });
         });
     });

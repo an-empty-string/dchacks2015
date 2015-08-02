@@ -120,5 +120,6 @@ def get_train_positions():
     for i in trains:
         data.append(dict(near=_station_fmt(wmata.stations[i.station_near]),
                          far=_station_fmt(wmata.stations[i.station_far]),
-                         fraction=i.fraction))
+                         fraction=i.fraction, line=i.line, dest=i.dest,
+                         ttf=i.time_to_far))
     return jsonify(data=data)

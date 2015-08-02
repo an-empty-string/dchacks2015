@@ -25,3 +25,6 @@ class CurrentTrainPosition(BaseModel):
     station_near = CharField()
     station_far = CharField()
     fraction = FloatField()
+    line = CharField()
+    dest = CharField()
+    time_to_far = IntegerField()
